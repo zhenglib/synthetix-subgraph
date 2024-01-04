@@ -189,7 +189,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "synth",
+        "name": "tribe",
         "type": "address"
       },
       {
@@ -201,7 +201,7 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "vSynth",
+        "name": "vTribe",
         "type": "address"
       },
       {
@@ -217,7 +217,7 @@
         "type": "uint256"
       }
     ],
-    "name": "VirtualSynthCreated",
+    "name": "VirtualTribeCreated",
     "type": "event"
   },
   {
@@ -361,7 +361,7 @@
       },
       {
         "internalType": "bool",
-        "name": "virtualSynth",
+        "name": "virtualTribe",
         "type": "bool"
       },
       {
@@ -383,8 +383,8 @@
         "type": "uint256"
       },
       {
-        "internalType": "contract IVirtualSynth",
-        "name": "vSynth",
+        "internalType": "contract IVirtualTribe",
+        "name": "vTribe",
         "type": "address"
       }
     ],
@@ -627,7 +627,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "isSynthRateInvalid",
+    "name": "isTribeRateInvalid",
     "outputs": [
       {
         "internalType": "bool",
@@ -875,21 +875,6 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "currencyKey",
-        "type": "bytes32"
-      }
-    ],
-    "name": "suspendSynthWithInvalidRate",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

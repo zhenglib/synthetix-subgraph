@@ -81,10 +81,10 @@ Find detailed documentation for the more commonly accessed subgraph entities bel
 
 ### Candle
 
-The Candle entity stores data pertaining to the price of the SNX token and each synth, as reported by Chainlink oracles, over various time periods. This contains all of the data necessary to generate candlestick charts.
+The Candle entity stores data pertaining to the price of the HAKA token and each synth, as reported by Chainlink oracles, over various time periods. This contains all of the data necessary to generate candlestick charts.
 
 - `id` (string) - The unique identifier for this candle, represented as _synth_-_period_-_periodId_. (_periodId_ is calculated by dividing the current timestamp by the period.)
-- `synth` (string) - The ticker symbol for synth (e.g. sUSD) or SNX.
+- `synth` (string) - The ticker symbol for synth (e.g. hUSD) or HAKA.
 - `period` (integer) - The duration this candle is tracking, in seconds. The following periods are available: year (31556736), quarter (7889184), month (2629728), week (604800), day (86400), hour (3600), and 15 minutes (900).
 - `open` (decimal) - The price reported at the beginning of this period.
 - `high` (decimal) - The highest price reported during this period.
@@ -126,16 +126,16 @@ The Total entities aggregate SynthExchange data and futures trades over time. No
 - `exchangeUSDTally` (decimal) - The value of all synths exchanged, denominated in USD, in this Total.
 - `totalFeesGeneratedInUSD` (decimal) - The value of all exchange fees, denominated in USD, generated in this Total.
 
-### SnxHolder
+### hakaHolder
 
-This entity represents each individual holder of SNX tokens.
+This entity represents each individual holder of HAKA tokens.
 
 - `id` (string) - The user's address.
 - `block` (integer) - The number of the last block where an event from this user updated this entity.
 - `timestamp` (integer) - The timestamp, in second, of the last block where an event from this user updated this entity.
-- `balanceOf` (decimal) - The current balance of SNX tokens held by this user.
-- `collateral` (decimal) - The amount of SNX which is being used for collateral as of last event and cannot be spent
-- `transferable` (decimal) - The amount of SNX which can be spent as of the last event.
+- `balanceOf` (decimal) - The current balance of HAKA tokens held by this user.
+- `collateral` (decimal) - The amount of HAKA which is being used for collateral as of last event and cannot be spent
+- `transferable` (decimal) - The amount of HAKA which can be spent as of the last event.
 - `initialDebtOwnership` (integer) - The percentage of the total debt owned at the time of issuance. This number is modified by the global debt delta array. You can figure out a user's exit price and collateralization ratio using a combination of their initial debt and the slice of global debt delta which applies to them.
 - `debtEntryAtIndex` (integer) - An index which lets us know when (in relative terms) the user entered the debt pool so we can calculate their exit price and collateralization ratio.
 - `claims` (integer) - The number of fee claims performed by this user.

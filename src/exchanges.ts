@@ -1,29 +1,30 @@
 import {
-  SynthExchange as SynthExchangeEvent,
-  AtomicSynthExchange as AtomicSynthExchangeEvent,
+  TribeExchange as TribeExchangeEvent,
+  AtomicTribeExchange as AtomicTribeExchangeEvent,
   ExchangeReclaim as ExchangeReclaimEvent,
   ExchangeRebate as ExchangeRebateEvent,
-} from '../generated/subgraphs/exchanges/exchanges_Synthetix_0/Synthetix';
+} from '../generated/subgraphs/exchanges/exchanges_Tribeone_0/Tribeone';
 
-import { PositionModified as PositionModifiedEvent } from '../generated/subgraphs/exchanges/exchanges_FuturesMarketManager_0/FuturesMarket';
+// import { PositionModified as PositionModifiedEvent } from '../generated/subgraphs/exchanges/exchanges_FuturesMarketManager_0/FuturesMarket';
 
-import { MarketAdded as MarketAddedEvent } from '../generated/subgraphs/exchanges/exchanges_FuturesMarketManager_0/FuturesMarketManager';
+// import { MarketAdded as MarketAddedEvent } from '../generated/subgraphs/exchanges/exchanges_FuturesMarketManager_0/FuturesMarketManager';
 
 import { FuturesMarketTemplate } from '../generated/subgraphs/exchanges/templates';
 
-import { ExchangeRates } from '../generated/subgraphs/exchanges/ExchangeRates_13/ExchangeRates';
+// import { ExchangeRates } from '../generated/subgraphs/exchanges/ExchangeRates_13/ExchangeRates';
+import { ExchangeRates } from '../generated/subgraphs/exchanges/ExchangeRates_0/ExchangeRates';
 
 import { ExchangeFeeUpdated as ExchangeFeeUpdatedEvent } from '../generated/subgraphs/exchanges/exchanges_SystemSettings_0/SystemSettings';
 
 import {
   Total,
-  SynthExchange,
-  AtomicSynthExchange,
+  TribeExchange,
+  AtomicTribeExchange,
   Exchanger,
   ExchangeReclaim,
   ExchangeRebate,
   ExchangeFee,
-  SynthByCurrencyKey,
+  TribeByCurrencyKey,
   FuturesMarket,
 } from '../generated/subgraphs/exchanges/schema';
 
@@ -42,7 +43,8 @@ import {
 } from './lib/helpers';
 import { toDecimal, ZERO_ADDRESS } from './lib/helpers';
 import { addDollar, addProxyAggregator } from './fragments/latest-rates';
-import { Synthetix } from '../generated/subgraphs/latest-rates/ChainlinkMultisig/Synthetix';
+
+import { Tribeone } from '../generated/subgraphs/latest-rates/ChainlinkMultisig/Tribeone';
 import { AddressResolver } from '../generated/subgraphs/latest-rates/ChainlinkMultisig/AddressResolver';
 
 const MAX_MAGNITUDE = 10;
@@ -53,11 +55,11 @@ function populateAggregatedTotalEntity(
   period: BigInt,
   product: string,
   bucketMagnitude: BigInt,
-  synth: string | null,
+  tribe: string | null,
 ): Total {
-  const synthName = synth && synth.length ? (synth as string) : 'null';
+  const tribeName = tribe && tribe.length ? (tribe as string) : 'null';
   let id =
-    timestamp.toString() + '-' + bucketMagnitude.toString() + '-' + synthName + '-' + period.toString() + '-' + product;
+    timestamp.toString() + '-' + bucketMagnitude.toString() + '-' + tribeName + '-' + period.toString() + '-' + product;
 
   let entity = Total.load(id);
 
@@ -69,7 +71,7 @@ function populateAggregatedTotalEntity(
   entity.timestamp = timestamp;
   entity.period = period;
   entity.bucketMagnitude = bucketMagnitude;
-  entity.synth = synth;
+  entity.tribe = tribe;
   entity.product = product;
 
   entity.trades = ZERO;
@@ -109,7 +111,7 @@ function trackTotals(
     exchanger.timestamp = entity.timestamp;
     exchanger.period = entity.period;
     exchanger.bucketMagnitude = entity.bucketMagnitude;
-    exchanger.synth = entity.synth;
+    exchanger.tribe = entity.tribe;
 
     exchanger.trades = ZERO;
     exchanger.exchangeUSDTally = new BigDecimal(ZERO);
@@ -133,23 +135,23 @@ function trackTotals(
   exchanger.save();
 }
 
-function addMissingSynthRate(currencyBytes: Bytes): BigDecimal {
-  if (currencyBytes.toString() == 'sUSD' || currencyBytes.toString() == 'nUSD') {
-    addDollar('sUSD');
+function addMissingTribeRate(currencyBytes: Bytes): BigDecimal {
+  if (currencyBytes.toString() == 'hUSD' || currencyBytes.toString() == 'nUSD') {
+    addDollar('hUSD');
     addDollar('nUSD');
     return toDecimal(BigInt.fromI32(1));
   }
 
-  let snx = Synthetix.bind(dataSource.address());
-  let snxResolver = snx.try_resolver();
-  if (!snxResolver.reverted) {
-    let resolver = AddressResolver.bind(snxResolver.value);
+  let haka = Tribeone.bind(dataSource.address());
+  let hakaResolver = haka.try_resolver();
+  if (!hakaResolver.reverted) {
+    let resolver = AddressResolver.bind(hakaResolver.value);
     let exchangeRatesContract = ExchangeRates.bind(resolver.getAddress(strToBytes('ExchangeRates')));
 
     let aggregatorResult = exchangeRatesContract.aggregators(currencyBytes);
 
     if (aggregatorResult.equals(ZERO_ADDRESS)) {
-      throw new Error('aggregator does not exist in exchange rates for synth ' + currencyBytes.toString());
+      throw new Error('aggregator does not exist in exchange rates for tribe ' + currencyBytes.toString());
     }
 
     addProxyAggregator(currencyBytes.toString(), aggregatorResult);
@@ -160,25 +162,25 @@ function addMissingSynthRate(currencyBytes: Bytes): BigDecimal {
   }
 }
 
-export function handleSynthExchange(event: SynthExchangeEvent): void {
+export function handleTribeExchange(event: TribeExchangeEvent): void {
   let txHash = event.transaction.hash.toHex();
   let fromCurrencyKey = event.params.fromCurrencyKey.toString();
   let toCurrencyKey = event.params.toCurrencyKey.toString();
   let latestFromRate = getLatestRate(fromCurrencyKey, txHash);
   let latestToRate = getLatestRate(toCurrencyKey, txHash);
-  // this will ensure SNX rate gets added at some point
-  let latestSNXRate = getLatestRate('SNX', txHash);
-  if (!latestSNXRate) {
-    addMissingSynthRate(strToBytes('SNX'));
+  // this will ensure HAKA rate gets added at some point
+  let latestHAKARate = getLatestRate('HAKA', txHash);
+  if (!latestHAKARate) {
+    addMissingTribeRate(strToBytes('HAKA'));
   }
 
   // may need to add new aggregator (this can happen on optimism)
   if (!latestFromRate) {
-    latestFromRate = addMissingSynthRate(event.params.fromCurrencyKey);
+    latestFromRate = addMissingTribeRate(event.params.fromCurrencyKey);
   }
 
   if (!latestToRate) {
-    latestToRate = addMissingSynthRate(event.params.fromCurrencyKey);
+    latestToRate = addMissingTribeRate(event.params.fromCurrencyKey);
   }
 
   let account = event.params.account;
@@ -186,19 +188,19 @@ export function handleSynthExchange(event: SynthExchangeEvent): void {
   let toAmountInUSD = getUSDAmountFromAssetAmount(event.params.toAmount, latestToRate);
 
   let feesInUSD = fromAmountInUSD.times(
-    getExchangeFee('exchangeFeeRate', fromCurrencyKey == 'sUSD' ? toCurrencyKey : fromCurrencyKey),
+    getExchangeFee('exchangeFeeRate', fromCurrencyKey == 'hUSD' ? toCurrencyKey : fromCurrencyKey),
   );
 
-  let fromSynth = SynthByCurrencyKey.load(fromCurrencyKey);
-  let toSynth = SynthByCurrencyKey.load(toCurrencyKey);
+  let fromTribe = TribeByCurrencyKey.load(fromCurrencyKey);
+  let toTribe = TribeByCurrencyKey.load(toCurrencyKey);
 
-  let fromSynthAddress = fromSynth != null ? fromSynth.proxyAddress : ZERO_ADDRESS;
-  let toSynthAddress = toSynth != null ? toSynth.proxyAddress : ZERO_ADDRESS;
+  let fromTribeAddress = fromTribe != null ? fromTribe.proxyAddress : ZERO_ADDRESS;
+  let toTribeAddress = toTribe != null ? toTribe.proxyAddress : ZERO_ADDRESS;
 
-  let eventEntity = new SynthExchange(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
+  let eventEntity = new TribeExchange(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
   eventEntity.account = account.toHex();
-  eventEntity.fromSynth = fromSynthAddress.toHex();
-  eventEntity.toSynth = toSynthAddress.toHex();
+  eventEntity.fromTribe = fromTribeAddress.toHex();
+  eventEntity.toTribe = toTribeAddress.toHex();
   eventEntity.fromAmount = toDecimal(event.params.fromAmount);
   eventEntity.fromAmountInUSD = fromAmountInUSD;
   eventEntity.toAmount = toDecimal(event.params.toAmount);
@@ -209,7 +211,7 @@ export function handleSynthExchange(event: SynthExchangeEvent): void {
   eventEntity.gasPrice = event.transaction.gasPrice;
   eventEntity.save();
 
-  let synthOpts: (string | null)[] = [null, fromSynthAddress.toHex(), toSynthAddress.toHex()];
+  let tribeOpts: (string | null)[] = [null, fromTribeAddress.toHex(), toTribeAddress.toHex()];
 
   let periods: BigInt[] = [
     YEAR_SECONDS,
@@ -221,8 +223,8 @@ export function handleSynthExchange(event: SynthExchangeEvent): void {
     ZERO,
   ];
 
-  for (let s = 0; s < synthOpts.length; s++) {
-    let synth = synthOpts[s];
+  for (let s = 0; s < tribeOpts.length; s++) {
+    let tribe = tribeOpts[s];
 
     for (let p = 0; p < periods.length; p++) {
       let period = periods[p];
@@ -235,7 +237,7 @@ export function handleSynthExchange(event: SynthExchangeEvent): void {
         }
 
         trackTotals(
-          populateAggregatedTotalEntity(startTimestamp, period, 'exchange', BigInt.fromI32(m), synth),
+          populateAggregatedTotalEntity(startTimestamp, period, 'exchange', BigInt.fromI32(m), tribe),
           account,
           event.block.timestamp,
           fromAmountInUSD,
@@ -246,7 +248,7 @@ export function handleSynthExchange(event: SynthExchangeEvent): void {
   }
 }
 
-export function handleAtomicSynthExchange(event: AtomicSynthExchangeEvent): void {
+export function handleAtomicTribeExchange(event: AtomicTribeExchangeEvent): void {
   let txHash = event.transaction.hash.toHex();
   let fromCurrencyKey = event.params.fromCurrencyKey.toString();
   let toCurrencyKey = event.params.toCurrencyKey.toString();
@@ -255,31 +257,31 @@ export function handleAtomicSynthExchange(event: AtomicSynthExchangeEvent): void
 
   // may need to add new aggregator (this can happen on optimism)
   if (!latestFromRate) {
-    latestFromRate = addMissingSynthRate(event.params.fromCurrencyKey);
+    latestFromRate = addMissingTribeRate(event.params.fromCurrencyKey);
   }
 
   if (!latestToRate) {
-    latestToRate = addMissingSynthRate(event.params.fromCurrencyKey);
+    latestToRate = addMissingTribeRate(event.params.fromCurrencyKey);
   }
 
   let account = event.params.account;
   let fromAmountInUSD = getUSDAmountFromAssetAmount(event.params.fromAmount, latestFromRate);
   let toAmountInUSD = getUSDAmountFromAssetAmount(event.params.toAmount, latestToRate);
 
-  let fromSynth = SynthByCurrencyKey.load(fromCurrencyKey);
-  let toSynth = SynthByCurrencyKey.load(toCurrencyKey);
+  let fromTribe = TribeByCurrencyKey.load(fromCurrencyKey);
+  let toTribe = TribeByCurrencyKey.load(toCurrencyKey);
 
   let feesInUSD = fromAmountInUSD.times(
-    getExchangeFee('atomicExchangeFeeRate', fromCurrencyKey == 'sUSD' ? toCurrencyKey : fromCurrencyKey),
+    getExchangeFee('atomicExchangeFeeRate', fromCurrencyKey == 'hUSD' ? toCurrencyKey : fromCurrencyKey),
   );
 
-  let fromSynthAddress = fromSynth != null ? fromSynth.proxyAddress : ZERO_ADDRESS;
-  let toSynthAddress = toSynth != null ? toSynth.proxyAddress : ZERO_ADDRESS;
+  let fromTribeAddress = fromTribe != null ? fromTribe.proxyAddress : ZERO_ADDRESS;
+  let toTribeAddress = toTribe != null ? toTribe.proxyAddress : ZERO_ADDRESS;
 
-  let eventEntity = new AtomicSynthExchange(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
+  let eventEntity = new AtomicTribeExchange(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
   eventEntity.account = account.toHex();
-  eventEntity.fromSynth = fromSynthAddress.toHex();
-  eventEntity.toSynth = toSynthAddress.toHex();
+  eventEntity.fromTribe = fromTribeAddress.toHex();
+  eventEntity.toTribe = toTribeAddress.toHex();
   eventEntity.fromAmount = toDecimal(event.params.fromAmount);
   eventEntity.fromAmountInUSD = fromAmountInUSD;
   eventEntity.toAmount = toDecimal(event.params.toAmount);
@@ -289,7 +291,7 @@ export function handleAtomicSynthExchange(event: AtomicSynthExchangeEvent): void
   eventEntity.timestamp = event.block.timestamp;
   eventEntity.gasPrice = event.transaction.gasPrice;
   eventEntity.save();
-  // Note that we do not update tracked totals here because atomic exchanges also emit standard SynthExchange events
+  // Note that we do not update tracked totals here because atomic exchanges also emit standard TribeExchange events
 }
 
 export function handleExchangeReclaim(event: ExchangeReclaimEvent): void {
@@ -331,7 +333,7 @@ export function handleExchangeRebate(event: ExchangeRebateEvent): void {
 }
 
 export function handleFeeChange(event: ExchangeFeeUpdatedEvent): void {
-  let currencyKey = event.params.synthKey.toString();
+  let currencyKey = event.params.tribeKey.toString();
 
   let entity = new ExchangeFee(currencyKey);
   entity.fee = toDecimal(event.params.newExchangeFeeRate);
@@ -360,10 +362,10 @@ export function handlePositionModified(event: PositionModifiedEvent): void {
 
   let amountInUSD = toDecimal(event.params.tradeSize.times(event.params.lastPrice).div(ETHER).abs());
 
-  let synthOpts: (string | null)[] = [null, market];
+  let tribeOpts: (string | null)[] = [null, market];
 
-  for (let s = 0; s < synthOpts.length; s++) {
-    let synth = synthOpts[s];
+  for (let s = 0; s < tribeOpts.length; s++) {
+    let tribe = tribeOpts[s];
 
     for (let p = 0; p < periods.length; p++) {
       let period = periods[p];
@@ -376,7 +378,7 @@ export function handlePositionModified(event: PositionModifiedEvent): void {
         }
 
         trackTotals(
-          populateAggregatedTotalEntity(startTimestamp, period, 'futures', BigInt.fromI32(m), synth),
+          populateAggregatedTotalEntity(startTimestamp, period, 'futures', BigInt.fromI32(m), tribe),
           event.params.account,
           event.block.timestamp,
           amountInUSD,

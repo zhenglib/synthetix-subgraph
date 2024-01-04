@@ -13,6 +13,7 @@ const dataSources = {};
 const templates = {};
 
 for (const included of includedSubgraphs) {
+  console.log('>>>>>>>>>>>  Processing : ', included);
   const def = require(`./${included}`);
 
   for (const ds of def.dataSources) {

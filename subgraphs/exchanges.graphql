@@ -1,9 +1,9 @@
-" Tracks this event from the Synthetix.sol contract "
-type SynthExchange @entity {
+" Tracks this event from the Tribeone.sol contract "
+type TribeExchange @entity {
   id: ID!
   account: Exchanger! # address
-  fromSynth: Synth
-  toSynth: Synth
+  fromTribe: Tribe
+  toTribe: Tribe
   fromAmount: BigDecimal! # uint256
   fromAmountInUSD: BigDecimal! # from Amount including fees
   toAmount: BigDecimal! # uint256
@@ -14,12 +14,12 @@ type SynthExchange @entity {
   gasPrice: BigInt!
 }
 
-" Tracks this event from the Synthetix.sol contract. (Atomic exchanges also trigger standard SynthExchange events.)"
-type AtomicSynthExchange @entity {
+" Tracks this event from the Tribeone.sol contract. (Atomic exchanges also trigger standard TribeExchange events.)"
+type AtomicTribeExchange @entity {
   id: ID!
   account: Exchanger! # address
-  fromSynth: Synth
-  toSynth: Synth
+  fromTribe: Tribe
+  toTribe: Tribe
   fromAmount: BigDecimal! # uint256
   fromAmountInUSD: BigDecimal! # from Amount including fees
   toAmount: BigDecimal! # uint256
@@ -30,7 +30,7 @@ type AtomicSynthExchange @entity {
   gasPrice: BigInt!
 }
 
-" Tracks this event from the Synthetix.sol contract "
+" Tracks this event from the Tribeone.sol contract "
 type ExchangeReclaim @entity {
   id: ID!
   account: Exchanger! # address
@@ -42,7 +42,7 @@ type ExchangeReclaim @entity {
   block: BigInt!
 }
 
-" Tracks this event from the Synthetix.sol contract "
+" Tracks this event from the Tribeone.sol contract "
 type ExchangeRebate @entity {
   id: ID!
   account: Exchanger!
@@ -54,9 +54,9 @@ type ExchangeRebate @entity {
   block: BigInt!
 }
 
-# Aggrgeations of the synth exchanges by various time/volume groupings
+# Aggrgeations of the tribe exchanges by various time/volume groupings
 type Total @entity {
-  " $timestamp-$bucketMagnitude-$synth-$period "
+  " $timestamp-$bucketMagnitude-$tribe-$period "
   id: ID!
 
   " timestamp of the beginning of the time period this represents "
@@ -71,8 +71,8 @@ type Total @entity {
   " minimum power of 10 (in from USD value) the trade must be. ex, 2 means $100 or higher) "
   bucketMagnitude: BigInt!
 
-  " synth to filter by "
-  synth: Synth
+  " tribe to filter by "
+  tribe: Tribe
 
   " number of trades completed over period "
   trades: BigInt!
@@ -83,16 +83,16 @@ type Total @entity {
   " number of unique traders seen over period "
   exchangers: BigInt!
 
-  " synth value exchanged in USD units "
+  " tribe value exchanged in USD units "
   exchangeUSDTally: BigDecimal!
 
-  " synth value received in fees in USD units "
+  " tribe value received in fees in USD units "
   totalFeesGeneratedInUSD: BigDecimal!
 }
 
 " An individual Exchanger aggregated by various time groupings "
 type Exchanger @entity {
-  " hex address in lowercase (and for non global: hex address in lowercase-$timestamp-$period-$bucketMagnitude-$synth "
+  " hex address in lowercase (and for non global: hex address in lowercase-$timestamp-$period-$bucketMagnitude-$tribe "
   id: ID!
 
   " timestamp of the beginning of the time period this represents, or 0 for no period filter "
@@ -104,8 +104,8 @@ type Exchanger @entity {
   " minimum power of 10 (in from USD value) the trade must be. ex, 2 means $100 or higher) "
   bucketMagnitude: BigInt!
 
-  " synth to filter by "
-  synth: Synth
+  " tribe to filter by "
+  tribe: Tribe
 
   " when the user first exchanged "
   firstSeen: BigInt!
@@ -116,21 +116,21 @@ type Exchanger @entity {
   " nubmer of trades by account "
   trades: BigInt!
 
-  " synth value exchanged in USD units by account "
+  " tribe value exchanged in USD units by account "
   exchangeUSDTally: BigDecimal!
 
-  " synth value received in fees in USD units from account "
+  " tribe value received in fees in USD units from account "
   totalFeesGeneratedInUSD: BigDecimal!
 
   " balances "
-  balances: [LatestSynthBalance!]!
+  balances: [LatestTribeBalance!]!
 
   " exchanges "
-  exchanges: [SynthExchange!]! @derivedFrom(field: "account")
+  exchanges: [TribeExchange!]! @derivedFrom(field: "account")
 }
 
 type ExchangeFee @entity {
-  " Name of the synth. E.g. sUSD "
+  " Name of the tribe. E.g. hUSD "
   id: ID!
 
   " Current Fee as a ratio of the trade amount "
@@ -138,10 +138,10 @@ type ExchangeFee @entity {
 }
 
 type Candle @entity {
-  " synth-period-periodId (periodId is timestamp / period) "
+  " tribe-period-periodId (periodId is timestamp / period) "
   id: ID!
-  " Ticker for synth (e.g. 'sUSD') or 'SNX'"
-  synth: String!
+  " Ticker for tribe (e.g. 'hUSD') or 'HAKA'"
+  tribe: String!
   open: BigDecimal!
   high: BigDecimal!
   low: BigDecimal!
@@ -158,7 +158,7 @@ type Candle @entity {
 type DailyCandle @entity {
   " DEPRECATED: See the Candles entity "
   id: ID!
-  synth: String!
+  tribe: String!
   open: BigDecimal!
   high: BigDecimal!
   low: BigDecimal!
@@ -167,10 +167,10 @@ type DailyCandle @entity {
 }
 
 type InversePricingInfo @entity {
-  " Name of inverse synth. E.g. iETH "
+  " Name of inverse tribe. E.g. iETH "
   id: ID!
 
-  " whether or not this inverse synth has been frozen "
+  " whether or not this inverse tribe has been frozen "
   frozen: Boolean!
 
   " configured upper limit "
@@ -179,15 +179,15 @@ type InversePricingInfo @entity {
   " configured lower limit "
   lowerLimit: BigDecimal!
 
-  " matching price point with long synth "
+  " matching price point with long tribe "
   entryPoint: BigDecimal!
 }
 
 type LatestRate @entity {
-  " Name of synth. E.g. sUSD "
+  " Name of tribe. E.g. hUSD "
   id: ID!
 
-  " Synth USD rate "
+  " Tribe USD rate "
   rate: BigDecimal!
 
   " Address of the aggregator which produces current result "
@@ -201,7 +201,7 @@ type RateUpdate @entity {
   " currencyKey for which this this rate update applies "
   currencyKey: Bytes!
   " currencyKey expressed as a string "
-  synth: String!
+  tribe: String!
   " the rate recorded at this timestamp "
   rate: BigDecimal!
   " the block which this rate was recorded "
@@ -210,14 +210,14 @@ type RateUpdate @entity {
   timestamp: BigInt!
 }
 
-type SynthByCurrencyKey @entity {
+type TribeByCurrencyKey @entity {
   " currency key "
   id: ID!
   proxyAddress: Bytes!
 }
 
-type Synth @entity {
-  " lowercase address of the proxy contract for the synth "
+type Tribe @entity {
+  " lowercase address of the proxy contract for the tribe "
   id: ID!
   name: String!
   symbol: String!
@@ -225,25 +225,25 @@ type Synth @entity {
   totalSupply: BigDecimal!
 }
 
-type SynthBalance @entity {
-  " timestamp + account + synth address "
+type TribeBalance @entity {
+  " timestamp + account + tribe address "
   id: ID!
   amount: BigDecimal!
   address: Bytes!
   account: String! # using a string here because its ID compatible
   timestamp: BigInt!
-  synth: Synth
+  tribe: Tribe
 }
 
 " we dont query this entity but only use it to store aggregate data we need during syncing "
-type LatestSynthBalance @entity {
-  " account + synth address "
+type LatestTribeBalance @entity {
+  " account + tribe address "
   id: ID!
   amount: BigDecimal!
   address: Bytes!
   account: String!
   timestamp: BigInt!
-  synth: Synth
+  tribe: Tribe
 }
 
 type FuturesMarket @entity {

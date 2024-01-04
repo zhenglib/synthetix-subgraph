@@ -1,12 +1,12 @@
-" Synthentix is an aggregation entity "
-type Synthetix @entity {
+" Tribeentix is an aggregation entity "
+type Tribeone @entity {
   id: ID!
 
   " number of stakers currently staking "
   issuers: BigInt!
 
-  " number of addresses which hold SNX "
-  snxHolders: BigInt!
+  " number of addresses which hold HAKA "
+  hakaHolders: BigInt!
 }
 
 " An individual Issuer "
@@ -14,8 +14,8 @@ type Issuer @entity {
   id: ID!
 }
 
-" An individual SNX holder (always overridden with their latest information) "
-type SNXHolder @entity {
+" An individual HAKA holder (always overridden with their latest information) "
+type HAKAHolder @entity {
   " address of holder "
   id: ID!
 
@@ -25,14 +25,14 @@ type SNXHolder @entity {
   " last time where an event happened "
   timestamp: BigInt!
 
-  " current SNX balance of the holder "
+  " current HAKA balance of the holder "
   balanceOf: BigDecimal
 
   # the following will be null before multicurrency (v2) release
-  " SNX which is being used for collateral as of last event and cannot be spent "
+  " HAKA which is being used for collateral as of last event and cannot be spent "
   collateral: BigDecimal
 
-  " SNX which can be spent as of last event "
+  " HAKA which can be spent as of last event "
   transferable: BigDecimal
 
   initialDebtOwnership: BigInt
@@ -61,13 +61,13 @@ type DebtSnapshot @entity {
   balanceOf: BigDecimal # early on it was possible this wouldn't have a value (pre v2)
   # the following will be null before multicurrency (v2) release
 
-  " SNX which is being used for collateral as of last event and cannot be spent "
+  " HAKA which is being used for collateral as of last event and cannot be spent "
   collateral: BigDecimal
 
-  " sUSD of debt as of last event "
+  " hUSD of debt as of last event "
   debtBalanceOf: BigDecimal
 
-  " sUSD debt portion a user had at last index "
+  " hUSD debt portion a user had at last index "
   initialDebtOwnership: BigDecimal
 
   " debt entry when `initialDebtOwnership` applies"
@@ -96,7 +96,7 @@ type DailyBurned @entity {
   totalDebt: BigDecimal!
 }
 
-" Tracks this event from various Synth.sol instances "
+" Tracks this event from various Tribe.sol instances "
 type Issued @entity {
   id: ID!
   account: Bytes! # address
@@ -107,7 +107,7 @@ type Issued @entity {
   block: BigInt!
 }
 
-" Burned tracks this event from various Synth.sol instances "
+" Burned tracks this event from various Tribe.sol instances "
 type Burned @entity {
   id: ID!
   account: Bytes! # address
@@ -125,11 +125,11 @@ type RewardEscrowHolder @entity {
   " amount of tokens remaining to be claimed from the escrow "
   balanceOf: BigDecimal!
 
-  " amount of SNX claimed from the escrow "
+  " amount of HAKA claimed from the escrow "
   vestedBalanceOf: BigDecimal!
 }
 
-" Tracks this event from Synthetix.sol "
+" Tracks this event from Tribeone.sol "
 type FeesClaimed @entity {
   id: ID!
   account: Bytes! # address
@@ -170,14 +170,14 @@ type TotalDailyActiveStaker @entity {
 type ActiveStaker @entity {
   id: ID!
 }
-type SynthByCurrencyKey @entity {
+type TribeByCurrencyKey @entity {
   " currency key "
   id: ID!
   proxyAddress: Bytes!
 }
 
-type Synth @entity {
-  " lowercase address of the proxy contract for the synth "
+type Tribe @entity {
+  " lowercase address of the proxy contract for the tribe "
   id: ID!
   name: String!
   symbol: String!
@@ -185,23 +185,23 @@ type Synth @entity {
   totalSupply: BigDecimal!
 }
 
-type SynthBalance @entity {
-  " timestamp + account + synth address "
+type TribeBalance @entity {
+  " timestamp + account + tribe address "
   id: ID!
   amount: BigDecimal!
   address: Bytes!
   account: String! # using a string here because its ID compatible
   timestamp: BigInt!
-  synth: Synth
+  tribe: Tribe
 }
 
 " we dont query these entities but only use it to store aggregate data we need during syncing "
-type LatestSynthBalance @entity {
-  " account + synth address "
+type LatestTribeBalance @entity {
+  " account + tribe address "
   id: ID!
   amount: BigDecimal!
   address: Bytes!
   account: String!
   timestamp: BigInt!
-  synth: Synth
+  tribe: Tribe
 }

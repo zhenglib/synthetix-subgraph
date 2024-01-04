@@ -1,7 +1,8 @@
 import { BigDecimal, BigInt, Bytes, ByteArray, log, Address, dataSource } from '@graphprotocol/graph-ts';
 
-import { LatestRate, FeeRate } from '../../generated/subgraphs/latest-rates/schema';
-import { initFeed, initFeeRate } from '../fragments/latest-rates';
+// import { LatestRate, FeeRate } from '../../generated/subgraphs/latest-rates/schema';
+
+// import { initFeed, initFeeRate } from '../fragments/latest-rates';
 import { getContractDeployment } from '../../generated/addresses';
 
 export let ZERO = BigInt.fromI32(0);
@@ -36,8 +37,8 @@ export function strToBytes(str: string, length: i32 = 32): Bytes {
   return Bytes.fromByteArray(Bytes.fromUTF8(str));
 }
 
-export let sUSD32 = strToBytes('sUSD', 32);
-export let sUSD4 = strToBytes('sUSD', 4);
+export let hUSD32 = strToBytes('hUSD', 32);
+export let hUSD4 = strToBytes('hUSD', 4);
 
 export function getTimeID(timestamp: BigInt, num: BigInt): BigInt {
   let remainder = timestamp.mod(num);
@@ -49,31 +50,31 @@ export function getUSDAmountFromAssetAmount(amount: BigInt, rate: BigDecimal): B
   return decimalAmount.times(rate);
 }
 
-export function getLatestRate(synth: string, txHash: string): BigDecimal | null {
-  let latestRate = LatestRate.load(synth);
-  if (latestRate == null) {
-    log.warning('latest rate missing for synth: {}, in tx hash: {}', [synth, txHash]);
+// export function getLatestRate(tribe: string, txHash: string): BigDecimal | null {
+//   let latestRate = LatestRate.load(tribe);
+//   if (latestRate == null) {
+//     log.warning('latest rate missing for tribe: {}, in tx hash: {}', [tribe, txHash]);
 
-    // load feed for the first time, and use contract call to get rate
-    return initFeed(synth);
-  }
-  return latestRate.rate;
-}
+//     // load feed for the first time, and use contract call to get rate
+//     return initFeed(tribe);
+//   }
+//   return latestRate.rate;
+// }
 
-export function getExchangeFee(type: string, synth: string): BigDecimal {
-  let rate = FeeRate.load(type + '-' + synth);
-  if (rate == null) {
-    log.warning('atomic exchange rate missing for synth: {}', [synth]);
+// export function getExchangeFee(type: string, tribe: string): BigDecimal {
+//   let rate = FeeRate.load(type + '-' + tribe);
+//   if (rate == null) {
+//     log.warning('atomic exchange rate missing for tribe: {}', [tribe]);
 
-    // load feed for the first time, and use contract call to get rate
-    return initFeeRate(type, synth);
-  }
-  return rate.rate;
-}
+//     // load feed for the first time, and use contract call to get rate
+//     return initFeeRate(type, tribe);
+//   }
+//   return rate.rate;
+// }
 
 export function isEscrow(holder: string, network: string): boolean {
   return (
-    getContractDeployment('SynthetixEscrow', dataSource.network(), BigInt.fromI32(1000000000))!.toHexString() ==
+    getContractDeployment('TribeoneEscrow', dataSource.network(), BigInt.fromI32(1000000000))!.toHexString() ==
       holder ||
     getContractDeployment('RewardEscrow', dataSource.network(), BigInt.fromI32(1000000000))!.toHexString() == holder
   );

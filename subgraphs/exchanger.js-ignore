@@ -1,0 +1,116 @@
+const { clone } = require('lodash');
+
+const { getContractDeployments, getCurrentNetwork, createSubgraphManifest } = require('./utils/network');
+
+const latestRatesManifests = require('./fragments/latest-rates');
+
+const manifest = clone(latestRatesManifests.dataSources);
+
+// add exchanger events
+getContractDeployments('Exchanger').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `exchanger_Exchanger_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: a.startBlock,
+      abi: 'Exchanger',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/exchanger.ts',
+      entities: ['ExchangeEntrySettled', 'ExchangeEntryAppended', 'TemporaryExchangePartnerTracker'],
+      abis: [
+        {
+          name: 'Exchanger',
+          file: '../abis/Exchanger.json',
+        },
+      ],
+      eventHandlers: [
+        {
+          event:
+            'ExchangeEntrySettled(indexed address,bytes32,uint256,bytes32,uint256,uint256,uint256,uint256,uint256)',
+          handler: 'handleExchangeEntrySettled',
+        },
+        {
+          event: 'ExchangeEntryAppended(indexed address,bytes32,uint256,bytes32,uint256,uint256,uint256,uint256)',
+          handler: 'handleExchangeEntryAppended',
+        },
+      ],
+    },
+  });
+});
+
+// add tribeone (only the new contracts)
+getContractDeployments('ProxyERC20').forEach((a, i) => {
+  // if (i === 0 && (getCurrentNetwork() !== 'optimism' || getCurrentNetwork() !== 'optimism-kovan')) {
+  //   manifest.push({
+  //     kind: 'ethereum/contract',
+  //     name: 'exchanger_TribeoneOldTracking',
+  //     network: getCurrentNetwork(),
+  //     source: {
+  //       address: a.address,
+  //       startBlock: a.startBlock,
+  //       abi: 'TribeoneOldTracking',
+  //     },
+  //     mapping: {
+  //       kind: 'ethereum/events',
+  //       apiVersion: '0.0.5',
+  //       language: 'wasm/assemblyscript',
+  //       file: '../src/exchanger.ts',
+  //       entities: ['DailyExchangePartner', 'ExchangePartner', 'TemporaryExchangePartnerTracker'],
+  //       abis: [
+  //         {
+  //           name: 'TribeoneOldTracking',
+  //           file: '../abis/Tribeone_oldTracking.json',
+  //         },
+  //       ],
+  //       eventHandlers: [
+  //         {
+  //           event: 'ExchangeTracking(indexed bytes32,bytes32,uint256)',
+  //           handler: 'handleExchangeTrackingV1',
+  //         },
+  //       ],
+  //     },
+  //   });
+  // }
+
+
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `exchanger_Tribeone_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock:
+        i === 0 && getCurrentNetwork() === 'mainnet'
+          ? Math.max(parseInt(process.env.HAKA_START_BLOCK || '0'), 12733161)
+          : a.startBlock,
+      abi: 'Tribeone',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/exchanger.ts',
+      entities: ['DailyExchangePartner', 'ExchangePartner', 'TemporaryExchangePartnerTracker'],
+      abis: [
+        {
+          name: 'Tribeone',
+          file: '../abis/Tribeone.json',
+        },
+      ],
+      eventHandlers: [
+        {
+          event: 'ExchangeTracking(indexed bytes32,bytes32,uint256,uint256)',
+          handler: 'handleExchangeTrackingV2',
+        },
+      ],
+    },
+  });
+});
+
+module.exports = createSubgraphManifest('exchanger', manifest, latestRatesManifests.templates);

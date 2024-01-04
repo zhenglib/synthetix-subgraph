@@ -1,8 +1,8 @@
 type Candle @entity {
-  " synth-period-periodId (periodId is timestamp / period) "
+  " tribe-period-periodId (periodId is timestamp / period) "
   id: ID!
-  " Ticker for synth (e.g. 'sUSD') or 'SNX'"
-  synth: String!
+  " Ticker for tribe (e.g. 'hUSD') or 'HAKA'"
+  tribe: String!
   open: BigDecimal!
   high: BigDecimal!
   low: BigDecimal!
@@ -16,10 +16,10 @@ type Candle @entity {
 }
 
 type InversePricingInfo @entity {
-  " Name of inverse synth. E.g. iETH "
+  " Name of inverse tribe. E.g. iETH "
   id: ID!
 
-  " whether or not this inverse synth has been frozen "
+  " whether or not this inverse tribe has been frozen "
   frozen: Boolean!
 
   " configured upper limit "
@@ -28,15 +28,15 @@ type InversePricingInfo @entity {
   " configured lower limit "
   lowerLimit: BigDecimal!
 
-  " matching price point with long synth "
+  " matching price point with long tribe "
   entryPoint: BigDecimal!
 }
 
 type LatestRate @entity {
-  " Name of synth. E.g. sUSD "
+  " Name of tribe. E.g. hUSD "
   id: ID!
 
-  " Synth USD rate "
+  " Tribe USD rate "
   rate: BigDecimal!
 
   " Address of the aggregator which produces current result "
@@ -52,7 +52,7 @@ type RateUpdate @entity {
   currencyKey: Bytes!
 
   " currencyKey expressed as a string "
-  synth: String!
+  tribe: String!
 
   " the rate recorded at this timestamp "
   rate: BigDecimal!
@@ -70,8 +70,8 @@ type FeeRate @entity {
 
   setting: String!
 
-  " name of the synth this record applies to, if any "
-  synth: String
+  " name of the tribe this record applies to, if any "
+  tribe: String
 
   " value of the setting "
   rate: BigDecimal!
@@ -81,7 +81,7 @@ type FeeRate @entity {
 type DailyCandle @entity {
   " DEPRECATED: See the Candles entity "
   id: ID!
-  synth: String!
+  tribe: String!
   open: BigDecimal!
   high: BigDecimal!
   low: BigDecimal!

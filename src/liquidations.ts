@@ -1,4 +1,4 @@
-import { Synthetix32 } from '../generated/subgraphs/liquidations/liquidations_Liquidations_0/Synthetix32';
+import { Tribeone32 } from '../generated/subgraphs/liquidations/liquidations_Liquidations_0/Tribeone32';
 
 import { AddressResolver } from '../generated/subgraphs/liquidations/liquidations_Liquidations_0/AddressResolver';
 
@@ -8,7 +8,7 @@ import {
   Liquidations,
 } from '../generated/subgraphs/liquidations/liquidations_Liquidations_0/Liquidations';
 
-import { AccountLiquidated as AccountLiquidatedEvent } from '../generated/subgraphs/liquidations/liquidations_Synthetix_0/Synthetix';
+import { AccountLiquidated as AccountLiquidatedEvent } from '../generated/subgraphs/liquidations/liquidations_Tribeone_0/Tribeone';
 
 import {
   AccountFlaggedForLiquidation,
@@ -21,15 +21,15 @@ import { strToBytes, toDecimal } from './lib/helpers';
 export function handleAccountFlaggedForLiquidation(event: AccountFlaggedForLiquidationEvent): void {
   let liquidationsContract = Liquidations.bind(event.address);
   let resolver = AddressResolver.bind(liquidationsContract.resolver());
-  let synthetix = Synthetix32.bind(resolver.getAddress(strToBytes('Synthetix', 32)));
+  let tribeone = Tribeone32.bind(resolver.getAddress(strToBytes('Tribeone', 32)));
   let accountFlaggedForLiquidation = new AccountFlaggedForLiquidation(
     event.params.deadline.toString() + '-' + event.params.account.toHex(),
   );
   accountFlaggedForLiquidation.account = event.params.account;
   accountFlaggedForLiquidation.deadline = event.params.deadline;
-  accountFlaggedForLiquidation.collateralRatio = synthetix.collateralisationRatio(event.params.account);
-  accountFlaggedForLiquidation.collateral = toDecimal(synthetix.collateral(event.params.account));
-  accountFlaggedForLiquidation.liquidatableNonEscrowSNX = toDecimal(synthetix.balanceOf(event.params.account));
+  accountFlaggedForLiquidation.collateralRatio = tribeone.collateralisationRatio(event.params.account);
+  accountFlaggedForLiquidation.collateral = toDecimal(tribeone.collateral(event.params.account));
+  accountFlaggedForLiquidation.liquidatableNonEscrowHAKA = toDecimal(tribeone.balanceOf(event.params.account));
   accountFlaggedForLiquidation.save();
 }
 
@@ -46,7 +46,7 @@ export function handleAccountLiquidated(event: AccountLiquidatedEvent): void {
   let entity = new AccountLiquidated(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
 
   entity.account = event.params.account;
-  entity.snxRedeemed = toDecimal(event.params.snxRedeemed);
+  entity.hakaRedeemed = toDecimal(event.params.hakaRedeemed);
   entity.amountLiquidated = toDecimal(event.params.amountLiquidated);
   entity.liquidator = event.params.liquidator;
   entity.time = event.block.timestamp;

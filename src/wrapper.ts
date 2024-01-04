@@ -128,7 +128,7 @@ function initializeWrapper(wrapper: Wrapper, address: Address): Wrapper {
     let wrapperContract = WrapperContract.bind(address);
     wrapper.tokenAddress = wrapperContract.token().toHexString();
     wrapper.currencyKey = wrapperContract.currencyKey().toString();
-    wrapper.amount = toDecimal(wrapperContract.targetSynthIssued());
+    wrapper.amount = toDecimal(wrapperContract.targetTribeIssued());
     wrapper.maxAmount = toDecimal(wrapperContract.maxTokenAmount());
     wrapper.totalFees = BigDecimal.fromString('0'); // TBD
   }

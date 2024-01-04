@@ -18,12 +18,21 @@ interface ContractInfo { address: string };
 export function getContractDeployment(contractName: string, network: string, block: BigInt): Address | null {
 `);
 
-for (const network of ['mainnet', 'mainnet-ovm', 'kovan', 'kovan-ovm']) {
-  const versions = require(`synthetix/publish/deployed/${network}/versions.json`);
+// for (const network of ['mainnet', 'mainnet-ovm', 'kovan', 'kovan-ovm', 'arbitrum-goerli']) {
+for (const network of ['arbitrum-goerli']) {
+  // const versions = require(`tribeone/publish/deployed/${network}/versions.json`);
+  const versions = require(`../../publish/deployed/${network}/versions.json`);
+
+  console.log('scripts/helpers/create-contracts.js > ', { versions });
+  if (!versions['v3.0.0-arbitrum-goerli']) {
+    console.error('!!!!!!!!!!!!  Error do not load correct versions file.');
+  }
 
   let networkName;
   switch (network) {
     case 'mainnet':
+    case 'goerli':
+    case 'arbitrum-goerli':
     case 'kovan':
       networkName = network;
       break;

@@ -79,11 +79,11 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "synth",
+        "name": "tribe",
         "type": "address"
       }
     ],
-    "name": "SynthAdded",
+    "name": "TribeAdded",
     "type": "event"
   },
   {
@@ -98,27 +98,12 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "synth",
+        "name": "tribe",
         "type": "address"
       }
     ],
-    "name": "SynthRemoved",
+    "name": "TribeRemoved",
     "type": "event"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "CIRCUIT_BREAKER_SUSPENSION_REASON",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "constant": true,
@@ -148,12 +133,12 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract ISynth",
-        "name": "synth",
+        "internalType": "contract ITribe",
+        "name": "tribe",
         "type": "address"
       }
     ],
-    "name": "addSynth",
+    "name": "addTribe",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -163,12 +148,12 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract ISynth[]",
-        "name": "synthsToAdd",
+        "internalType": "contract ITribe[]",
+        "name": "tribesToAdd",
         "type": "address[]"
       }
     ],
-    "name": "addSynths",
+    "name": "addTribes",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -202,7 +187,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "anySynthOrSNXRateIsInvalid",
+    "name": "anyTribeOrHAKARateIsInvalid",
     "outputs": [
       {
         "internalType": "bool",
@@ -232,7 +217,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "availableSynthCount",
+    "name": "availableTribeCount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -253,10 +238,10 @@
         "type": "uint256"
       }
     ],
-    "name": "availableSynths",
+    "name": "availableTribes",
     "outputs": [
       {
-        "internalType": "contract ISynth",
+        "internalType": "contract ITribe",
         "name": "",
         "type": "address"
       }
@@ -270,7 +255,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "deprecatedSynthProxy",
+        "name": "deprecatedTribeProxy",
         "type": "address"
       },
       {
@@ -304,7 +289,7 @@
         "type": "uint256"
       }
     ],
-    "name": "burnSynths",
+    "name": "burnTribes",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -329,7 +314,7 @@
         "type": "uint256"
       }
     ],
-    "name": "burnSynthsOnBehalf",
+    "name": "burnTribesOnBehalf",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -344,7 +329,7 @@
         "type": "address"
       }
     ],
-    "name": "burnSynthsToTarget",
+    "name": "burnTribesToTarget",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -364,7 +349,7 @@
         "type": "address"
       }
     ],
-    "name": "burnSynthsToTargetOnBehalf",
+    "name": "burnTribesToTargetOnBehalf",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -389,7 +374,7 @@
         "type": "uint256"
       }
     ],
-    "name": "burnSynthsWithoutDebt",
+    "name": "burnTribesWithoutDebt",
     "outputs": [
       {
         "internalType": "bool",
@@ -410,7 +395,7 @@
         "type": "address"
       }
     ],
-    "name": "canBurnSynths",
+    "name": "canBurnTribes",
     "outputs": [
       {
         "internalType": "bool",
@@ -525,10 +510,10 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "getSynths",
+    "name": "getTribes",
     "outputs": [
       {
-        "internalType": "contract ISynth[]",
+        "internalType": "contract ITribe[]",
         "name": "",
         "type": "address[]"
       }
@@ -576,7 +561,7 @@
         "type": "address"
       }
     ],
-    "name": "issueMaxSynths",
+    "name": "issueMaxTribes",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -596,7 +581,7 @@
         "type": "address"
       }
     ],
-    "name": "issueMaxSynthsOnBehalf",
+    "name": "issueMaxTribesOnBehalf",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -616,7 +601,7 @@
         "type": "uint256"
       }
     ],
-    "name": "issueSynths",
+    "name": "issueTribes",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -641,7 +626,7 @@
         "type": "uint256"
       }
     ],
-    "name": "issueSynthsOnBehalf",
+    "name": "issueTribesOnBehalf",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -666,7 +651,7 @@
         "type": "uint256"
       }
     ],
-    "name": "issueSynthsWithoutDebt",
+    "name": "issueTribesWithoutDebt",
     "outputs": [
       {
         "internalType": "bool",
@@ -676,21 +661,6 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "lastDebtRatio",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -737,7 +707,12 @@
       },
       {
         "internalType": "uint256",
-        "name": "amountToLiquidate",
+        "name": "debtRemoved",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "escrowToLiquidate",
         "type": "uint256"
       }
     ],
@@ -750,11 +725,52 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "isSelfLiquidation",
+        "type": "bool"
+      }
+    ],
+    "name": "liquidationAmounts",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalRedeemed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "debtToRemove",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "escrowToLiquidate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialDebtBalance",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_issuer",
         "type": "address"
       }
     ],
-    "name": "maxIssuableSynths",
+    "name": "maxIssuableTribes",
     "outputs": [
       {
         "internalType": "uint256",
@@ -779,6 +795,26 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "modifyDebtSharesForMigration",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -844,7 +880,7 @@
         "type": "address"
       }
     ],
-    "name": "remainingIssuableSynths",
+    "name": "remainingIssuableTribes",
     "outputs": [
       {
         "internalType": "uint256",
@@ -875,7 +911,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "removeSynth",
+    "name": "removeTribe",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -890,7 +926,7 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "removeSynths",
+    "name": "removeTribes",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -942,63 +978,6 @@
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "ratio",
-        "type": "uint256"
-      }
-    ],
-    "name": "setLastDebtRatio",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "name": "synths",
-    "outputs": [
-      {
-        "internalType": "contract ISynth",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "synthsByAddress",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "constant": true,
     "inputs": [
       {
@@ -1012,7 +991,7 @@
         "type": "bool"
       }
     ],
-    "name": "totalIssuedSynths",
+    "name": "totalIssuedTribes",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1038,7 +1017,7 @@
         "type": "uint256"
       }
     ],
-    "name": "transferableSynthetixAndAnyRateIsInvalid",
+    "name": "transferableTribeoneAndAnyRateIsInvalid",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1053,6 +1032,68 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "tribes",
+    "outputs": [
+      {
+        "internalType": "contract ITribe",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "tribesByAddress",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "short",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "upgradeCollateralShort",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

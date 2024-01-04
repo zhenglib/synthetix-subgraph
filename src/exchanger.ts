@@ -3,8 +3,8 @@ import {
   ExchangeEntryAppended as ExchangeEntryAppendedEvent,
 } from '../generated/subgraphs/exchanger/exchanger_Exchanger_0/Exchanger';
 
-import { ExchangeTracking as ExchangeTrackingEventV2 } from '../generated/subgraphs/exchanger/exchanger_Synthetix_0/Synthetix';
-import { ExchangeTracking as ExchangeTrackingEventV1 } from '../generated/subgraphs/exchanger/exchanger_SynthetixOldTracking/SynthetixOldTracking';
+import { ExchangeTracking as ExchangeTrackingEventV2 } from '../generated/subgraphs/exchanger/exchanger_Tribeone_0/Tribeone';
+// import { ExchangeTracking as ExchangeTrackingEventV1 } from '../generated/subgraphs/exchanger/exchanger_TribeoneOldTracking/TribeoneOldTracking';
 
 import {
   ExchangeEntrySettled,
@@ -113,12 +113,12 @@ export function handleExchangeEntryAppended(event: ExchangeEntryAppendedEvent): 
     event.block.number > partnerProgramStart &&
     event.block.number < exchangerContractUpdate
   ) {
-    let synth = event.params.src.toString();
-    let latestRate = LatestRate.load(synth);
+    let tribe = event.params.src.toString();
+    let latestRate = LatestRate.load(tribe);
     if (latestRate == null) {
       log.error(
-        'handleExchangeEntryAppended rate missing for volume partner trade with synth: {}, and amount: {} in tx hash: {}',
-        [synth, event.params.amount.toString(), txHash],
+        'handleExchangeEntryAppended rate missing for volume partner trade with tribe: {}, and amount: {} in tx hash: {}',
+        [tribe, event.params.amount.toString(), txHash],
       );
       return;
     }
@@ -157,61 +157,61 @@ export function handleExchangeEntryAppended(event: ExchangeEntryAppendedEvent): 
   }
 }
 
-export function handleExchangeTrackingV1(event: ExchangeTrackingEventV1): void {
-  let txHash = event.transaction.hash.toHex();
-  let exchangePartnerID = event.params.trackingCode.toString();
+// export function handleExchangeTrackingV1(event: ExchangeTrackingEventV1): void {
+//   let txHash = event.transaction.hash.toHex();
+//   let exchangePartnerID = event.params.trackingCode.toString();
 
-  let tempEntity = TemporaryExchangePartnerTracker.load(txHash);
+//   let tempEntity = TemporaryExchangePartnerTracker.load(txHash);
 
-  if (tempEntity == null) {
-    tempEntity = createTempEntity(txHash);
-    tempEntity.partner = exchangePartnerID;
-    tempEntity.save();
-    return;
-  }
+//   if (tempEntity == null) {
+//     tempEntity = createTempEntity(txHash);
+//     tempEntity.partner = exchangePartnerID;
+//     tempEntity.save();
+//     return;
+//   }
 
-  if (tempEntity != null && (!tempEntity.usdVolume || !tempEntity.usdFees)) {
-    log.error(
-      'handleExchangeTracking tempEntity exists but the volume and/ or rebate is null for txhash: {}, partner: {}',
-      [txHash, exchangePartnerID],
-    );
-    return;
-  }
+//   if (tempEntity != null && (!tempEntity.usdVolume || !tempEntity.usdFees)) {
+//     log.error(
+//       'handleExchangeTracking tempEntity exists but the volume and/ or rebate is null for txhash: {}, partner: {}',
+//       [txHash, exchangePartnerID],
+//     );
+//     return;
+//   }
 
-  let exchangePartner = ExchangePartner.load(exchangePartnerID);
-  if (exchangePartner == null) {
-    exchangePartner = loadNewExchangePartner(exchangePartnerID);
-  }
-  updateExchangePartner(
-    exchangePartner as ExchangePartner,
-    tempEntity.usdVolume as BigDecimal,
-    tempEntity.usdFees as BigDecimal,
-  );
+//   let exchangePartner = ExchangePartner.load(exchangePartnerID);
+//   if (exchangePartner == null) {
+//     exchangePartner = loadNewExchangePartner(exchangePartnerID);
+//   }
+//   updateExchangePartner(
+//     exchangePartner as ExchangePartner,
+//     tempEntity.usdVolume as BigDecimal,
+//     tempEntity.usdFees as BigDecimal,
+//   );
 
-  let timestamp = getTimeID(event.block.timestamp, DAY_SECONDS);
-  let dailyExchangePartnerID = timestamp.toString() + '-' + exchangePartnerID;
-  let dailyExchangePartner = DailyExchangePartner.load(dailyExchangePartnerID);
-  if (dailyExchangePartner == null) {
-    dailyExchangePartner = loadNewDailyExchangePartner(dailyExchangePartnerID, exchangePartnerID, timestamp);
-  }
+//   let timestamp = getTimeID(event.block.timestamp, DAY_SECONDS);
+//   let dailyExchangePartnerID = timestamp.toString() + '-' + exchangePartnerID;
+//   let dailyExchangePartner = DailyExchangePartner.load(dailyExchangePartnerID);
+//   if (dailyExchangePartner == null) {
+//     dailyExchangePartner = loadNewDailyExchangePartner(dailyExchangePartnerID, exchangePartnerID, timestamp);
+//   }
 
-  updateDailyExchangePartner(
-    dailyExchangePartner as DailyExchangePartner,
-    tempEntity.usdVolume as BigDecimal,
-    tempEntity.usdFees as BigDecimal,
-  );
+//   updateDailyExchangePartner(
+//     dailyExchangePartner as DailyExchangePartner,
+//     tempEntity.usdVolume as BigDecimal,
+//     tempEntity.usdFees as BigDecimal,
+//   );
 
-  resetTempEntity(txHash);
-}
+//   resetTempEntity(txHash);
+// }
 
 export function handleExchangeTrackingV2(event: ExchangeTrackingEventV2): void {
   let txHash = event.transaction.hash.toHex();
-  let synth = event.params.toCurrencyKey.toString();
-  let latestRate = LatestRate.load(synth);
+  let tribe = event.params.toCurrencyKey.toString();
+  let latestRate = LatestRate.load(tribe);
   if (latestRate == null) {
     log.error(
-      'handleExchangeEntryAppended rate missing for volume partner trade with synth: {}, and amount: {} in tx hash: {}',
-      [synth, event.params.toAmount.toString(), txHash],
+      'handleExchangeEntryAppended rate missing for volume partner trade with tribe: {}, and amount: {} in tx hash: {}',
+      [tribe, event.params.toAmount.toString(), txHash],
     );
     return;
   }

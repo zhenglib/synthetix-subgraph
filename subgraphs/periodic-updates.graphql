@@ -7,13 +7,13 @@ type DebtState @entity {
   " time at which these values are recorded "
   timestamp: BigInt!
 
-  " representation of total amount of debt issued over time. increases or decreases proportionally whenever synths are minted/burned "
+  " representation of total amount of debt issued over time. increases or decreases proportionally whenever tribes are minted/burned "
   debtEntry: BigDecimal!
 
-  " current value of all issued synths which this debt pool is responsible for. fluctuates based on the synth breakdown of the system * exchange rates "
-  totalIssuedSynths: BigDecimal!
+  " current value of all issued tribes which this debt pool is responsible for. fluctuates based on the tribe breakdown of the system * exchange rates "
+  totalIssuedTribes: BigDecimal!
 
-  " totalIssuedSynths / debtEntry - useful for tracking debt over time "
+  " totalIssuedTribes / debtEntry - useful for tracking debt over time "
   debtRatio: BigDecimal!
 }
 
@@ -62,7 +62,7 @@ type SystemSetting @entity {
   " SIP 112: ETH Wrappr: The fee for depositing ETH into the EtherWrapper. "
   etherWrapperMintFeeRate: BigDecimal!
 
-  " SIP 112: ETH Wrappr: The fee for burning sETH and releasing ETH from the EtherWrapper. "
+  " SIP 112: ETH Wrappr: The fee for burning hETH and releasing ETH from the EtherWrapper. "
   etherWrapperBurnFeeRate: BigDecimal!
 
   " SIP-120 Atomic exchanges: max allowed volume per block for atomic exchanges "

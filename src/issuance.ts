@@ -1,22 +1,22 @@
-// The latest Synthetix and event invocations
+// The latest Tribeone and event invocations
 import {
-  Synthetix as SNX,
-  Transfer as SNXTransferEvent,
-} from '../generated/subgraphs/issuance/issuance_Synthetix_0/Synthetix';
+  Tribeone as HAKA,
+  Transfer as HAKATransferEvent,
+} from '../generated/subgraphs/issuance/issuance_Tribeone_0/Tribeone';
 
 import { FeePool as FeePoolContract } from '../generated/subgraphs/issuance/issuance_FeePool_0/FeePool';
 
-import { Synthetix32 } from '../generated/subgraphs/issuance/issuance_Synthetix_0/Synthetix32';
+// import { Tribeone32 } from '../generated/subgraphs/issuance/issuance_Tribeone_0/Tribeone32';
 
-import { Synthetix4 } from '../generated/subgraphs/issuance/issuance_Synthetix_0/Synthetix4';
+// import { Tribeone4 } from '../generated/subgraphs/issuance/issuance_Tribeone_0/Tribeone4';
 
-import { AddressResolver } from '../generated/subgraphs/issuance/issuance_Synthetix_0/AddressResolver';
+import { AddressResolver } from '../generated/subgraphs/issuance/issuance_Tribeone_0/AddressResolver';
 
-import { sUSD32, sUSD4, toDecimal, ZERO_ADDRESS, ZERO } from './lib/helpers';
+import { hUSD32, hUSD4, toDecimal, ZERO_ADDRESS, ZERO } from './lib/helpers';
 import { getTimeID, isEscrow } from './lib/helpers';
 
-// SynthetixState has not changed ABI since deployment
-import { SynthetixState } from '../generated/subgraphs/issuance/issuance_Synthetix_0/SynthetixState';
+// TribeoneState has not changed ABI since deployment
+import { TribeoneState } from '../generated/subgraphs/issuance/issuance_Tribeone_0/TribeoneState';
 
 import {
   Vested as VestedEvent,
@@ -24,10 +24,10 @@ import {
 } from '../generated/subgraphs/issuance/issuance_RewardEscrow_0/RewardEscrow';
 
 import {
-  Synth as SynthContract,
+  Tribe as TribeContract,
   Issued as IssuedEvent,
   Burned as BurnedEvent,
-} from '../generated/subgraphs/issuance/issuance_SynthsUSD_0/Synth';
+} from '../generated/subgraphs/issuance/issuance_TribehUSD_0/Tribe';
 import {
   FeesClaimed as FeesClaimedEvent,
   FeePeriodClosed as FeePeriodClosedEvent,
@@ -35,11 +35,11 @@ import {
 import { FeePoolv217 } from '../generated/subgraphs/issuance/issuance_FeePool_0/FeePoolv217';
 
 import {
-  Synthetix,
+  Tribeone,
   Issued,
   Burned,
   Issuer,
-  SNXHolder,
+  HAKAHolder,
   DebtSnapshot,
   RewardEscrowHolder,
   FeesClaimed,
@@ -58,38 +58,38 @@ import { strToBytes } from './lib/helpers';
 import { log } from '@graphprotocol/graph-ts';
 import { DAY_SECONDS } from './lib/helpers';
 import { getContractDeployment } from '../generated/addresses';
-import { registerSynth } from './fragments/balances';
-import { Synth } from '../generated/subgraphs/balances/schema';
+import { registerTribe } from './fragments/balances';
+import { Tribe } from '../generated/subgraphs/balances/schema';
 
 let v219UpgradeBlock = BigInt.fromI32(9518914); // Archernar v2.19.x Feb 20, 2020
 
-// [reference only] Synthetix v2.10.x (bytes4 to bytes32) at txn
+// [reference only] Tribeone v2.10.x (bytes4 to bytes32) at txn
 // https://etherscan.io/tx/0x612cf929f305af603e165f4cb7602e5fbeed3d2e2ac1162ac61087688a5990b6
 let v2100UpgradeBlock = BigInt.fromI32(8622911);
 
-// Synthetix v2.0.0 (rebrand from Havven and adding Multicurrency) at txn
+// Tribeone v2.0.0 (rebrand from Havven and adding Multicurrency) at txn
 // https://etherscan.io/tx/0x4b5864b1e4fdfe0ab9798de27aef460b124e9039a96d474ed62bd483e10c835a
 let v200UpgradeBlock = BigInt.fromI32(6841188); // Dec 7, 2018
 
-function getMetadata(): Synthetix {
-  let synthetix = Synthetix.load('1');
+function getMetadata(): Tribeone {
+  let tribeone = Tribeone.load('1');
 
-  if (synthetix == null) {
-    synthetix = new Synthetix('1');
-    synthetix.issuers = BigInt.fromI32(0);
-    synthetix.snxHolders = BigInt.fromI32(0);
-    synthetix.save();
+  if (tribeone == null) {
+    tribeone = new Tribeone('1');
+    tribeone.issuers = BigInt.fromI32(0);
+    tribeone.hakaHolders = BigInt.fromI32(0);
+    tribeone.save();
   }
 
-  return synthetix;
+  return tribeone;
 }
 
 function incrementMetadata(field: string): void {
   let metadata = getMetadata();
   if (field == 'issuers') {
     metadata.issuers = metadata.issuers.plus(BigInt.fromI32(1));
-  } else if (field == 'snxHolders') {
-    metadata.snxHolders = metadata.snxHolders.plus(BigInt.fromI32(1));
+  } else if (field == 'hakaHolders') {
+    metadata.hakaHolders = metadata.hakaHolders.plus(BigInt.fromI32(1));
   }
   metadata.save();
 }
@@ -98,8 +98,8 @@ function decrementMetadata(field: string): void {
   let metadata = getMetadata();
   if (field == 'issuers') {
     metadata.issuers = metadata.issuers.minus(BigInt.fromI32(1));
-  } else if (field == 'snxHolders') {
-    metadata.snxHolders = metadata.snxHolders.minus(BigInt.fromI32(1));
+  } else if (field == 'hakaHolders') {
+    metadata.hakaHolders = metadata.hakaHolders.minus(BigInt.fromI32(1));
   }
   metadata.save();
 }
@@ -113,8 +113,8 @@ function trackIssuer(account: Address): void {
   }
 }
 
-function trackSNXHolder(
-  snxContract: Address,
+function trackHAKAHolder(
+  hakaContract: Address,
   account: Address,
   block: ethereum.Block,
   txn: ethereum.Transaction,
@@ -124,30 +124,30 @@ function trackSNXHolder(
   if (isEscrow(holder, dataSource.network())) {
     return;
   }
-  let existingSNXHolder = SNXHolder.load(holder);
-  let snxHolder = new SNXHolder(holder);
-  snxHolder.block = block.number;
-  snxHolder.timestamp = block.timestamp;
+  let existingHAKAHolder = HAKAHolder.load(holder);
+  let hakaHolder = new HAKAHolder(holder);
+  hakaHolder.block = block.number;
+  hakaHolder.timestamp = block.timestamp;
 
   // // Don't bother trying these extra fields before v2 upgrade (slows down The Graph processing to do all these as try_ calls)
   if (dataSource.network() != 'mainnet' || block.number > v219UpgradeBlock) {
-    let synthetix = SNX.bind(snxContract);
-    snxHolder.balanceOf = toDecimal(synthetix.balanceOf(account));
-    snxHolder.collateral = toDecimal(synthetix.collateral(account));
+    let tribeone = HAKA.bind(hakaContract);
+    hakaHolder.balanceOf = toDecimal(tribeone.balanceOf(account));
+    hakaHolder.collateral = toDecimal(tribeone.collateral(account));
 
     // Check transferable because it will be null when rates are stale
-    let transferableTry = synthetix.try_transferableSynthetix(account);
+    let transferableTry = tribeone.try_transferableTribeone(account);
     if (!transferableTry.reverted) {
-      snxHolder.transferable = toDecimal(transferableTry.value);
+      hakaHolder.transferable = toDecimal(transferableTry.value);
     }
-    let resolverTry = synthetix.try_resolver();
+    let resolverTry = tribeone.try_resolver();
     if (resolverTry.reverted) {
-      // This happened when an old SNX token was reconnected to the old proxy temporarily to recover 25k SNX
+      // This happened when an old HAKA token was reconnected to the old proxy temporarily to recover 25k HAKA
       // from the old grantsDAO:
       // https://etherscan.io/tx/0x1f862d93373e6d5dbf2438f478c05eac67b2949664bf1b3e6a5b6d5adf92fb3c
       // https://etherscan.io/tx/0x84b4e312188890d744f6912f1e5d3387e2bf314a335a4418980a938e36b3ef34
-      // In this case, the old Synthetix did not have a resolver property, so let's ignore
-      log.debug('Skipping SNX holder tracking: No resolver property from SNX holder from hash: {}, block: {}', [
+      // In this case, the old Tribeone did not have a resolver property, so let's ignore
+      log.debug('Skipping HAKA holder tracking: No resolver property from HAKA holder from hash: {}, block: {}', [
         txn.hash.toHex(),
         block.number.toString(),
       ]);
@@ -155,9 +155,9 @@ function trackSNXHolder(
     }
     let resolverAddress = resolverTry.value;
     let resolver = AddressResolver.bind(resolverAddress);
-    let synthetixState = SynthetixState.bind(resolver.getAddress(strToBytes('SynthetixState', 32)));
-    let issuanceData = synthetixState.issuanceData(account);
-    snxHolder.initialDebtOwnership = issuanceData.value0;
+    let tribeoneState = TribeoneState.bind(resolver.getAddress(strToBytes('TribeoneState', 32)));
+    let issuanceData = tribeoneState.issuanceData(account);
+    hakaHolder.initialDebtOwnership = issuanceData.value0;
 
     // Note: due to limitations with how The Graph deals with chain reorgs, we need to try_debtLedger
     /*
@@ -180,65 +180,65 @@ function trackSNXHolder(
         - Block 0xb is processed. The handler now makes the try_debtLedger call against 100 -> 0xb and the correct data is being returned
     */
 
-    let debtLedgerTry = synthetixState.try_debtLedger(issuanceData.value1);
+    let debtLedgerTry = tribeoneState.try_debtLedger(issuanceData.value1);
     if (!debtLedgerTry.reverted) {
-      snxHolder.debtEntryAtIndex = debtLedgerTry.value;
+      hakaHolder.debtEntryAtIndex = debtLedgerTry.value;
     }
   } else if (block.number > v200UpgradeBlock) {
-    // Synthetix32 or Synthetix4
-    let synthetix = Synthetix32.bind(snxContract);
-    // Track all the staking information relevant to this SNX Holder
-    snxHolder.balanceOf = toDecimal(synthetix.balanceOf(account));
-    snxHolder.collateral = toDecimal(synthetix.collateral(account));
-    // Note: Below we try_transferableSynthetix as it uses debtBalanceOf, which eventually calls ExchangeRates.abs
-    // It's slower to use try but this protects against instances when Transfers were enabled
-    // yet ExchangeRates were stale and throwing errors when calling effectiveValue.
-    // E.g. https://etherscan.io/tx/0x5368339311aafeb9f92c5b5d84faa4864c2c3878681a402bbf0aabff60bafa08
-    let transferableTry = synthetix.try_transferableSynthetix(account);
-    if (!transferableTry.reverted) {
-      snxHolder.transferable = toDecimal(transferableTry.value);
-    }
-    let stateTry = synthetix.try_synthetixState();
-    if (!stateTry.reverted) {
-      let synthetixStateContract = synthetix.synthetixState();
-      let synthetixState = SynthetixState.bind(synthetixStateContract);
-      let issuanceData = synthetixState.issuanceData(account);
-      snxHolder.initialDebtOwnership = issuanceData.value0;
-      let debtLedgerTry = synthetixState.try_debtLedger(issuanceData.value1);
-      if (!debtLedgerTry.reverted) {
-        snxHolder.debtEntryAtIndex = debtLedgerTry.value;
-      }
-    }
+    // // Tribeone32 or Tribeone4
+    // let tribeone = Tribeone32.bind(hakaContract);
+    // // Track all the staking information relevant to this HAKA Holder
+    // hakaHolder.balanceOf = toDecimal(tribeone.balanceOf(account));
+    // hakaHolder.collateral = toDecimal(tribeone.collateral(account));
+    // // Note: Below we try_transferableTribeone as it uses debtBalanceOf, which eventually calls ExchangeRates.abs
+    // // It's slower to use try but this protects against instances when Transfers were enabled
+    // // yet ExchangeRates were stale and throwing errors when calling effectiveValue.
+    // // E.g. https://etherscan.io/tx/0x5368339311aafeb9f92c5b5d84faa4864c2c3878681a402bbf0aabff60bafa08
+    // let transferableTry = tribeone.try_transferableTribeone(account);
+    // if (!transferableTry.reverted) {
+    //   hakaHolder.transferable = toDecimal(transferableTry.value);
+    // }
+    // let stateTry = tribeone.try_tribeoneState();
+    // if (!stateTry.reverted) {
+    //   let tribeoneStateContract = tribeone.tribeoneState();
+    //   let tribeoneState = TribeoneState.bind(tribeoneStateContract);
+    //   let issuanceData = tribeoneState.issuanceData(account);
+    //   hakaHolder.initialDebtOwnership = issuanceData.value0;
+    //   let debtLedgerTry = tribeoneState.try_debtLedger(issuanceData.value1);
+    //   if (!debtLedgerTry.reverted) {
+    //     hakaHolder.debtEntryAtIndex = debtLedgerTry.value;
+    //   }
+    // }
   } else {
-    // When we were Havven, simply track their collateral (SNX balance and escrowed balance)
-    let synthetix = Synthetix4.bind(snxContract); // not the correct ABI/contract for pre v2 but should suffice
-    snxHolder.balanceOf = toDecimal(synthetix.balanceOf(account));
-    let collateralTry = synthetix.try_collateral(account);
-    if (!collateralTry.reverted) {
-      snxHolder.collateral = toDecimal(collateralTry.value);
-    }
+    // // When we were Havven, simply track their collateral (HAKA balance and escrowed balance)
+    // let tribeone = Tribeone4.bind(hakaContract); // not the correct ABI/contract for pre v2 but should suffice
+    // hakaHolder.balanceOf = toDecimal(tribeone.balanceOf(account));
+    // let collateralTry = tribeone.try_collateral(account);
+    // if (!collateralTry.reverted) {
+    //   hakaHolder.collateral = toDecimal(collateralTry.value);
+    // }
   }
 
   if (
-    (existingSNXHolder == null && snxHolder.balanceOf!.gt(toDecimal(BigInt.fromI32(0)))) ||
-    (existingSNXHolder != null &&
-      existingSNXHolder.balanceOf == toDecimal(BigInt.fromI32(0)) &&
-      snxHolder.balanceOf > toDecimal(BigInt.fromI32(0)))
+    (existingHAKAHolder == null && hakaHolder.balanceOf!.gt(toDecimal(BigInt.fromI32(0)))) ||
+    (existingHAKAHolder != null &&
+      existingHAKAHolder.balanceOf == toDecimal(BigInt.fromI32(0)) &&
+      hakaHolder.balanceOf > toDecimal(BigInt.fromI32(0)))
   ) {
-    incrementMetadata('snxHolders');
+    incrementMetadata('hakaHolders');
   } else if (
-    existingSNXHolder != null &&
-    existingSNXHolder.balanceOf > toDecimal(BigInt.fromI32(0)) &&
-    snxHolder.balanceOf == toDecimal(BigInt.fromI32(0))
+    existingHAKAHolder != null &&
+    existingHAKAHolder.balanceOf > toDecimal(BigInt.fromI32(0)) &&
+    hakaHolder.balanceOf == toDecimal(BigInt.fromI32(0))
   ) {
-    decrementMetadata('snxHolders');
+    decrementMetadata('hakaHolders');
   }
 
-  snxHolder.save();
+  hakaHolder.save();
 }
 
 function trackDebtSnapshot(event: ethereum.Event): void {
-  let snxContract = event.transaction.to!;
+  let hakaContract = event.transaction.to!;
   let account = event.transaction.from;
 
   // ignore escrow accounts
@@ -252,18 +252,18 @@ function trackDebtSnapshot(event: ethereum.Event): void {
   entity.account = account;
 
   if (dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) {
-    let synthetix = SNX.bind(snxContract);
-    let try_balanceOf = synthetix.try_balanceOf(account);
+    let tribeone = HAKA.bind(hakaContract);
+    let try_balanceOf = tribeone.try_balanceOf(account);
     if (try_balanceOf.reverted) {
       return;
     }
     entity.balanceOf = toDecimal(try_balanceOf.value);
 
-    let collateralTry = synthetix.try_collateral(account);
+    let collateralTry = tribeone.try_collateral(account);
     if (!collateralTry.reverted) {
       entity.collateral = toDecimal(collateralTry.value);
     }
-    let debtBalanceOfTry = synthetix.try_debtBalanceOf(account, sUSD32);
+    let debtBalanceOfTry = tribeone.try_debtBalanceOf(account, hUSD32);
     if (!debtBalanceOfTry.reverted) {
       entity.debtBalanceOf = toDecimal(debtBalanceOfTry.value);
     }
@@ -274,12 +274,12 @@ function trackDebtSnapshot(event: ethereum.Event): void {
       BigInt.fromI32(1000000000),
     )!;
     let resolver = AddressResolver.bind(addressResolverAddress);
-    let synthetixStateAddressTry = resolver.try_getAddress(strToBytes('SynthetixState', 32));
-    if (!synthetixStateAddressTry.reverted) {
-      let synthetixState = SynthetixState.bind(synthetixStateAddressTry.value);
-      let issuanceData = synthetixState.issuanceData(account);
+    let tribeoneStateAddressTry = resolver.try_getAddress(strToBytes('TribeoneState', 32));
+    if (!tribeoneStateAddressTry.reverted) {
+      let tribeoneState = TribeoneState.bind(tribeoneStateAddressTry.value);
+      let issuanceData = tribeoneState.issuanceData(account);
       entity.initialDebtOwnership = toDecimal(issuanceData.value0);
-      let debtLedgerTry = synthetixState.try_debtLedger(issuanceData.value1);
+      let debtLedgerTry = tribeoneState.try_debtLedger(issuanceData.value1);
       if (!debtLedgerTry.reverted) {
         entity.debtEntryAtIndex = debtLedgerTry.value;
       }
@@ -287,88 +287,85 @@ function trackDebtSnapshot(event: ethereum.Event): void {
   }
   // Use bytes32
   else if (event.block.number > v2100UpgradeBlock) {
-    let synthetix = Synthetix32.bind(snxContract);
-    let try_balanceOf = synthetix.try_balanceOf(account);
-    if (try_balanceOf.reverted) {
-      return;
-    }
-    entity.balanceOf = toDecimal(try_balanceOf.value);
-    let collateralTry = synthetix.try_collateral(account);
-    if (!collateralTry.reverted) {
-      entity.collateral = toDecimal(collateralTry.value);
-    }
-    let debtBalanceOfTry = synthetix.try_debtBalanceOf(account, sUSD4);
-    if (!debtBalanceOfTry.reverted) {
-      entity.debtBalanceOf = toDecimal(debtBalanceOfTry.value);
-    }
-
-    let addressResolverAddress = getContractDeployment(
-      'AddressResolver',
-      dataSource.network(),
-      BigInt.fromI32(1000000000),
-    )!;
-    let resolver = AddressResolver.bind(addressResolverAddress);
-
-    let synthetixStateAddressTry = resolver.try_getAddress(strToBytes('SynthetixState', 32));
-    if (!synthetixStateAddressTry.reverted) {
-      let synthetixState = SynthetixState.bind(synthetixStateAddressTry.value);
-      let issuanceData = synthetixState.issuanceData(account);
-      entity.initialDebtOwnership = toDecimal(issuanceData.value0);
-      let debtLedgerTry = synthetixState.try_debtLedger(issuanceData.value1);
-      if (!debtLedgerTry.reverted) {
-        entity.debtEntryAtIndex = debtLedgerTry.value;
-      }
-    }
+    // let tribeone = Tribeone32.bind(hakaContract);
+    // let try_balanceOf = tribeone.try_balanceOf(account);
+    // if (try_balanceOf.reverted) {
+    //   return;
+    // }
+    // entity.balanceOf = toDecimal(try_balanceOf.value);
+    // let collateralTry = tribeone.try_collateral(account);
+    // if (!collateralTry.reverted) {
+    //   entity.collateral = toDecimal(collateralTry.value);
+    // }
+    // let debtBalanceOfTry = tribeone.try_debtBalanceOf(account, hUSD4);
+    // if (!debtBalanceOfTry.reverted) {
+    //   entity.debtBalanceOf = toDecimal(debtBalanceOfTry.value);
+    // }
+    // let addressResolverAddress = getContractDeployment(
+    //   'AddressResolver',
+    //   dataSource.network(),
+    //   BigInt.fromI32(1000000000),
+    // )!;
+    // let resolver = AddressResolver.bind(addressResolverAddress);
+    // let tribeoneStateAddressTry = resolver.try_getAddress(strToBytes('TribeoneState', 32));
+    // if (!tribeoneStateAddressTry.reverted) {
+    //   let tribeoneState = TribeoneState.bind(tribeoneStateAddressTry.value);
+    //   let issuanceData = tribeoneState.issuanceData(account);
+    //   entity.initialDebtOwnership = toDecimal(issuanceData.value0);
+    //   let debtLedgerTry = tribeoneState.try_debtLedger(issuanceData.value1);
+    //   if (!debtLedgerTry.reverted) {
+    //     entity.debtEntryAtIndex = debtLedgerTry.value;
+    //   }
+    // }
     // Use bytes4
   } else {
-    let synthetix = Synthetix4.bind(snxContract); // not the correct ABI/contract for pre v2 but should suffice
-    let balanceOfTry = synthetix.try_balanceOf(account);
-    if (!balanceOfTry.reverted) {
-      entity.balanceOf = toDecimal(balanceOfTry.value);
-    }
-    let collateralTry = synthetix.try_collateral(account);
-    if (!collateralTry.reverted) {
-      entity.collateral = toDecimal(collateralTry.value);
-    }
-    let debtBalanceOfTry = synthetix.try_debtBalanceOf(account, sUSD4);
-    if (!debtBalanceOfTry.reverted) {
-      entity.debtBalanceOf = toDecimal(debtBalanceOfTry.value);
-    }
-
-    entity.initialDebtOwnership = toDecimal(ZERO);
+    // let tribeone = Tribeone4.bind(hakaContract); // not the correct ABI/contract for pre v2 but should suffice
+    // let balanceOfTry = tribeone.try_balanceOf(account);
+    // if (!balanceOfTry.reverted) {
+    //   entity.balanceOf = toDecimal(balanceOfTry.value);
+    // }
+    // let collateralTry = tribeone.try_collateral(account);
+    // if (!collateralTry.reverted) {
+    //   entity.collateral = toDecimal(collateralTry.value);
+    // }
+    // let debtBalanceOfTry = tribeone.try_debtBalanceOf(account, hUSD4);
+    // if (!debtBalanceOfTry.reverted) {
+    //   entity.debtBalanceOf = toDecimal(debtBalanceOfTry.value);
+    // }
+    // entity.initialDebtOwnership = toDecimal(ZERO);
   }
 
   entity.save();
 }
 
-export function handleTransferSNX(event: SNXTransferEvent): void {
-  let synth = Synth.load(event.address.toHex());
+export function handleTransferHAKA(event: HAKATransferEvent): void {
+  let tribe = Tribe.load(event.address.toHex());
 
-  if (synth == null) {
-    // ensure SNX is recorded
-    synth = registerSynth(event.address);
+  if (tribe == null) {
+    // ensure HAKA is recorded
+    tribe = registerTribe(event.address);
   }
 
   if (event.params.from.toHex() != ZERO_ADDRESS.toHex()) {
-    trackSNXHolder(event.address, event.params.from, event.block, event.transaction);
-  } else if (synth != null) {
-    // snx is minted
-    synth.totalSupply = synth.totalSupply.plus(toDecimal(event.params.value));
-    synth.save();
+    trackHAKAHolder(event.address, event.params.from, event.block, event.transaction);
+  } else if (tribe != null) {
+    // haka is minted
+    tribe.totalSupply = tribe.totalSupply.plus(toDecimal(event.params.value));
+    tribe.save();
   }
 
   if (event.params.to.toHex() != ZERO_ADDRESS.toHex()) {
-    trackSNXHolder(event.address, event.params.to, event.block, event.transaction);
-  } else if (synth != null) {
-    // snx is burned (only occurs on cross chain transfer)
-    synth.totalSupply = synth.totalSupply.minus(toDecimal(event.params.value));
-    synth.save();
+    trackHAKAHolder(event.address, event.params.to, event.block, event.transaction);
+  } else if (tribe != null) {
+    // haka is burned (only occurs on cross chain transfer)
+    tribe.totalSupply = tribe.totalSupply.minus(toDecimal(event.params.value));
+    tribe.save();
   }
 }
 
 /**
  * Handle reward vest events so that we know which addresses have rewards, and
- * to recalculate SNX Holders staking details.
+ * to recalculate HAKA Holders staking details.
  */
 // Note: we use VestedEvent here even though is also handles VestingEntryCreated (they share the same signature)
 export function handleRewardVestEvent(event: VestedEvent): void {
@@ -377,32 +374,32 @@ export function handleRewardVestEvent(event: VestedEvent): void {
   entity.balanceOf = toDecimal(contract.balanceOf(event.params.beneficiary));
   entity.vestedBalanceOf = toDecimal(contract.totalVestedAccountBalance(event.params.beneficiary));
   entity.save();
-  // now track the SNX holder as this action can impact their collateral
-  let synthetixAddress = contract.synthetix();
-  trackSNXHolder(synthetixAddress, event.params.beneficiary, event.block, event.transaction);
+  // now track the HAKA holder as this action can impact their collateral
+  let tribeoneAddress = contract.tribeone();
+  trackHAKAHolder(tribeoneAddress, event.params.beneficiary, event.block, event.transaction);
 }
 
-export function handleIssuedSynths(event: IssuedEvent): void {
+export function handleIssuedTribes(event: IssuedEvent): void {
   // update Debt snapshot history
   trackDebtSnapshot(event);
 
-  // We need to figure out if this was generated from a call to Synthetix.issueSynths, issueMaxSynths or any earlier
+  // We need to figure out if this was generated from a call to Tribeone.issueTribes, issueMaxTribes or any earlier
   // versions.
 
   let functions = new Map<string, string>();
 
-  functions.set('0xaf086c7e', 'issueMaxSynths()');
-  functions.set('0x320223db', 'issueMaxSynthsOnBehalf(address)');
-  functions.set('0x8a290014', 'issueSynths(uint256)');
-  functions.set('0xe8e09b8b', 'issueSynthsOnBehalf(address,uint256');
+  functions.set('0xaf086c7e', 'issueMaxTribes()');
+  functions.set('0x320223db', 'issueMaxTribesOnBehalf(address)');
+  functions.set('0x8a290014', 'issueTribes(uint256)');
+  functions.set('0xe8e09b8b', 'issueTribesOnBehalf(address,uint256');
 
   // Prior to Vega we had the currency key option in issuance
-  functions.set('0xef7fae7c', 'issueMaxSynths(bytes32)'); // legacy
-  functions.set('0x0ee54a1d', 'issueSynths(bytes32,uint256)'); // legacy
+  functions.set('0xef7fae7c', 'issueMaxTribes(bytes32)'); // legacy
+  functions.set('0x0ee54a1d', 'issueTribes(bytes32,uint256)'); // legacy
 
   // Prior to Sirius release, we had currency keys using bytes4
-  functions.set('0x9ff8c63f', 'issueMaxSynths(bytes4)'); // legacy
-  functions.set('0x49755b9e', 'issueSynths(bytes4,uint256)'); // legacy
+  functions.set('0x9ff8c63f', 'issueMaxTribes(bytes4)'); // legacy
+  functions.set('0x49755b9e', 'issueTribes(bytes4,uint256)'); // legacy
 
   // Prior to v2
   functions.set('0xda5341a8', 'issueMaxNomins()'); // legacy
@@ -424,28 +421,29 @@ export function handleIssuedSynths(event: IssuedEvent): void {
   let entity = new Issued(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
   entity.account = event.transaction.from;
 
-  // Note: this amount isn't in sUSD for sETH or sBTC issuance prior to Vega
+  // Note: this amount isn't in hUSD for hETH or hBTC issuance prior to Vega
   entity.value = toDecimal(event.params.value);
 
-  let synth = SynthContract.bind(event.address);
-  let currencyKeyTry = synth.try_currencyKey();
+  let tribe = TribeContract.bind(event.address);
+  let currencyKeyTry = tribe.try_currencyKey();
   if (!currencyKeyTry.reverted) {
     entity.source = currencyKeyTry.value.toString();
   } else {
-    entity.source = 'sUSD';
+    entity.source = 'hUSD';
   }
 
   // Don't bother getting data pre-Archernar to avoid slowing The Graph down. Can be changed later if needed.
-  if ((dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) && entity.source == 'sUSD') {
+  if ((dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) && entity.source == 'hUSD') {
     let timestamp = getTimeID(event.block.timestamp, DAY_SECONDS);
-    let synthetix = SNX.bind(event.transaction.to!);
+    let tribeone = HAKA.bind(event.transaction.to!);
 
-    let issuedSynths = synthetix.try_totalIssuedSynthsExcludeOtherCollateral(strToBytes('sUSD', 32));
-    if (issuedSynths.reverted) {
-      issuedSynths = synthetix.try_totalIssuedSynthsExcludeEtherCollateral(strToBytes('sUSD', 32));
-      if (issuedSynths.reverted) {
+    let issuedTribes = tribeone.try_totalIssuedTribesExcludeOtherCollateral(strToBytes('hUSD', 32));
+    if (issuedTribes.reverted) {
+      // issuedTribes = tribeone.try_totalIssuedTribesExcludeEtherCollateral(strToBytes('hUSD', 32));
+      issuedTribes = tribeone.try_totalIssuedTribes(strToBytes('hUSD', 32));
+      if (issuedTribes.reverted) {
         // for some reason this can happen (not sure how)
-        log.debug('Reverted issued try_totalIssuedSynthsExcludeEtherCollateral for hash: {}', [
+        log.debug('Reverted issued try_totalIssuedTribesExcludeEtherCollateral for hash: {}', [
           event.transaction.hash.toHex(),
         ]);
         return;
@@ -459,7 +457,7 @@ export function handleIssuedSynths(event: IssuedEvent): void {
     } else {
       dailyIssuedEntity.value = dailyIssuedEntity.value.plus(toDecimal(event.params.value));
     }
-    dailyIssuedEntity.totalDebt = toDecimal(issuedSynths.value);
+    dailyIssuedEntity.totalDebt = toDecimal(issuedTribes.value);
     dailyIssuedEntity.save();
   }
 
@@ -475,26 +473,26 @@ export function handleIssuedSynths(event: IssuedEvent): void {
   // track this issuer for reference
   trackIssuer(event.transaction.from);
 
-  // update SNX holder details
-  trackSNXHolder(event.transaction.to!, event.transaction.from, event.block, event.transaction);
+  // update HAKA holder details
+  trackHAKAHolder(event.transaction.to!, event.transaction.from, event.block, event.transaction);
 
-  // now update SNXHolder to increment the number of claims
-  let snxHolder = SNXHolder.load(entity.account.toHexString());
-  if (snxHolder != null) {
-    if (!snxHolder.mints) {
-      snxHolder.mints = BigInt.fromI32(0);
+  // now update HAKAHolder to increment the number of claims
+  let hakaHolder = HAKAHolder.load(entity.account.toHexString());
+  if (hakaHolder != null) {
+    if (!hakaHolder.mints) {
+      hakaHolder.mints = BigInt.fromI32(0);
     }
-    snxHolder.mints = snxHolder.mints!.plus(BigInt.fromI32(1));
-    snxHolder.save();
+    hakaHolder.mints = hakaHolder.mints!.plus(BigInt.fromI32(1));
+    hakaHolder.save();
   }
 
   // Don't bother getting data pre-Archernar to avoid slowing The Graph down. Can be changed later if needed.
-  if ((dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) && entity.source == 'sUSD') {
+  if ((dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) && entity.source == 'hUSD') {
     let timestamp = getTimeID(event.block.timestamp, DAY_SECONDS);
-    let synthetix = SNX.bind(event.transaction.to!);
-    let totalIssued = synthetix.try_totalIssuedSynthsExcludeOtherCollateral(sUSD32);
+    let tribeone = HAKA.bind(event.transaction.to!);
+    let totalIssued = tribeone.try_totalIssuedTribesExcludeOtherCollateral(hUSD32);
     if (totalIssued.reverted) {
-      log.debug('Reverted issued try_totalIssuedSynthsExcludeEtherCollateral for hash: {}', [
+      log.debug('Reverted issued try_totalIssuedTribesExcludeEtherCollateral for hash: {}', [
         event.transaction.hash.toHex(),
       ]);
       return;
@@ -512,24 +510,24 @@ export function handleIssuedSynths(event: IssuedEvent): void {
   }
 }
 
-export function handleBurnedSynths(event: BurnedEvent): void {
+export function handleBurnedTribes(event: BurnedEvent): void {
   // update Debt snapshot history
   trackDebtSnapshot(event);
 
-  // We need to figure out if this was generated from a call to Synthetix.burnSynths, burnSynthsToTarget or any earlier
+  // We need to figure out if this was generated from a call to Tribeone.burnTribes, burnTribesToTarget or any earlier
   // versions.
 
   let functions = new Map<string, string>();
-  functions.set('0x295da87d', 'burnSynths(uint256)');
-  functions.set('0xc2bf3880', 'burnSynthsOnBehalf(address,uint256');
-  functions.set('0x9741fb22', 'burnSynthsToTarget()');
-  functions.set('0x2c955fa7', 'burnSynthsToTargetOnBehalf(address)');
+  functions.set('0x295da87d', 'burnTribes(uint256)');
+  functions.set('0xc2bf3880', 'burnTribesOnBehalf(address,uint256');
+  functions.set('0x9741fb22', 'burnTribesToTarget()');
+  functions.set('0x2c955fa7', 'burnTribesToTargetOnBehalf(address)');
 
   // Prior to Vega we had the currency key option in issuance
-  functions.set('0xea168b62', 'burnSynths(bytes32,uint256)');
+  functions.set('0xea168b62', 'burnTribes(bytes32,uint256)');
 
   // Prior to Sirius release, we had currency keys using bytes4
-  functions.set('0xaf023335', 'burnSynths(bytes4,uint256)');
+  functions.set('0xaf023335', 'burnTribes(bytes4,uint256)');
 
   // Prior to v2 (i.e. in Havven times)
   functions.set('0x3253ccdf', 'burnNomins(uint256');
@@ -550,15 +548,15 @@ export function handleBurnedSynths(event: BurnedEvent): void {
   let entity = new Burned(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
   entity.account = event.transaction.from;
 
-  // Note: this amount isn't in sUSD for sETH or sBTC issuance prior to Vega
+  // Note: this amount isn't in hUSD for hETH or hBTC issuance prior to Vega
   entity.value = toDecimal(event.params.value);
 
-  let synth = SynthContract.bind(event.address);
-  let currencyKeyTry = synth.try_currencyKey();
+  let tribe = TribeContract.bind(event.address);
+  let currencyKeyTry = tribe.try_currencyKey();
   if (!currencyKeyTry.reverted) {
     entity.source = currencyKeyTry.value.toString();
   } else {
-    entity.source = 'sUSD';
+    entity.source = 'hUSD';
   }
 
   entity.timestamp = event.block.timestamp;
@@ -570,19 +568,20 @@ export function handleBurnedSynths(event: BurnedEvent): void {
     trackActiveStakers(event, true);
   }
 
-  // update SNX holder details
-  trackSNXHolder(event.transaction.to!, event.transaction.from, event.block, event.transaction);
+  // update HAKA holder details
+  trackHAKAHolder(event.transaction.to!, event.transaction.from, event.block, event.transaction);
 
   // Don't bother getting data pre-Archernar to avoid slowing The Graph down. Can be changed later if needed.
-  if ((dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) && entity.source == 'sUSD') {
+  if ((dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) && entity.source == 'hUSD') {
     let timestamp = getTimeID(event.block.timestamp, DAY_SECONDS);
-    let synthetix = SNX.bind(event.transaction.to!);
-    let issuedSynths = synthetix.try_totalIssuedSynthsExcludeOtherCollateral(strToBytes('sUSD', 32));
-    if (issuedSynths.reverted) {
-      issuedSynths = synthetix.try_totalIssuedSynthsExcludeEtherCollateral(strToBytes('sUSD', 32));
-      if (issuedSynths.reverted) {
+    let tribeone = HAKA.bind(event.transaction.to!);
+    let issuedTribes = tribeone.try_totalIssuedTribesExcludeOtherCollateral(strToBytes('hUSD', 32));
+    if (issuedTribes.reverted) {
+      // issuedTribes = tribeone.try_totalIssuedTribesExcludeEtherCollateral(strToBytes('hUSD', 32));
+      issuedTribes = tribeone.try_totalIssuedTribes(strToBytes('hUSD', 32));
+      if (issuedTribes.reverted) {
         // for some reason this can happen (not sure how)
-        log.debug('Reverted issued try_totalIssuedSynthsExcludeEtherCollateral for hash: {}', [
+        log.debug('Reverted issued try_totalIssuedTribesExcludeEtherCollateral for hash: {}', [
           event.transaction.hash.toHex(),
         ]);
         return;
@@ -596,7 +595,7 @@ export function handleBurnedSynths(event: BurnedEvent): void {
     } else {
       dailyBurnedEntity.value = dailyBurnedEntity.value.plus(toDecimal(event.params.value));
     }
-    dailyBurnedEntity.totalDebt = toDecimal(issuedSynths.value);
+    dailyBurnedEntity.totalDebt = toDecimal(issuedTribes.value);
     dailyBurnedEntity.save();
   }
 }
@@ -605,39 +604,38 @@ export function handleFeesClaimed(event: FeesClaimedEvent): void {
   let entity = new FeesClaimed(event.transaction.hash.toHex() + '-' + event.logIndex.toString());
 
   entity.account = event.params.account;
-  entity.rewards = toDecimal(event.params.snxRewards);
+  entity.rewards = toDecimal(event.params.hakaRewards);
   if (dataSource.network() != 'mainnet' || event.block.number > v219UpgradeBlock) {
-    // post Achernar, we had no XDRs, so use the value as sUSD
-    entity.value = toDecimal(event.params.sUSDAmount);
+    // post Achernar, we had no XDRs, so use the value as hUSD
+    entity.value = toDecimal(event.params.hUSDAmount);
   } else {
     // pre Achernar, we had XDRs, so we need to figure out their effective value,
-    // and for that we need to get to synthetix, which in pre-Achernar was exposed
-    // as a public synthetix property on FeePool
+    // and for that we need to get to tribeone, which in pre-Achernar was exposed
+    // as a public tribeone property on FeePool
     let feePool = FeePoolv217.bind(event.address);
 
     if (event.block.number > v2100UpgradeBlock) {
-      // use bytes32
-      let synthetix = Synthetix32.bind(feePool.synthetix());
-      // Note: the event param is called "sUSDAmount" because we are using the latest ABI to handle events
-      // from both newer and older invocations. Since the event signature of FeesClaimed hasn't changed between versions,
-      // we can reuse it, but accept that the variable naming uses the latest ABI
-      let tryEffectiveValue = synthetix.try_effectiveValue(
-        strToBytes('XDR', 32),
-        event.params.sUSDAmount,
-        strToBytes('sUSD', 32),
-      );
-
-      if (!tryEffectiveValue.reverted) {
-        entity.value = toDecimal(tryEffectiveValue.value);
-      } else {
-        entity.value = toDecimal(BigInt.fromI32(0)); // Note: not sure why this might be happening. Need to investigat
-      }
+      // // use bytes32
+      // let tribeone = Tribeone32.bind(feePool.tribeone());
+      // // Note: the event param is called "hUSDAmount" because we are using the latest ABI to handle events
+      // // from both newer and older invocations. Since the event signature of FeesClaimed hasn't changed between versions,
+      // // we can reuse it, but accept that the variable naming uses the latest ABI
+      // let tryEffectiveValue = tribeone.try_effectiveValue(
+      //   strToBytes('XDR', 32),
+      //   event.params.hUSDAmount,
+      //   strToBytes('hUSD', 32),
+      // );
+      // if (!tryEffectiveValue.reverted) {
+      //   entity.value = toDecimal(tryEffectiveValue.value);
+      // } else {
+      //   entity.value = toDecimal(BigInt.fromI32(0)); // Note: not sure why this might be happening. Need to investigat
+      // }
     } else {
-      // use bytes4
-      let synthetix = Synthetix4.bind(feePool.synthetix());
-      entity.value = toDecimal(
-        synthetix.effectiveValue(strToBytes('XDR', 4), event.params.sUSDAmount, strToBytes('sUSD', 4)),
-      );
+      // // use bytes4
+      // let tribeone = Tribeone4.bind(feePool.tribeone());
+      // entity.value = toDecimal(
+      //   tribeone.effectiveValue(strToBytes('XDR', 4), event.params.hUSDAmount, strToBytes('hUSD', 4)),
+      // );
     }
   }
 
@@ -646,14 +644,14 @@ export function handleFeesClaimed(event: FeesClaimedEvent): void {
 
   entity.save();
 
-  // now update SNXHolder to increment the number of claims
-  let snxHolder = SNXHolder.load(entity.account.toHexString());
-  if (snxHolder != null) {
-    if (!snxHolder.claims) {
-      snxHolder.claims = BigInt.fromI32(0);
+  // now update HAKAHolder to increment the number of claims
+  let hakaHolder = HAKAHolder.load(entity.account.toHexString());
+  if (hakaHolder != null) {
+    if (!hakaHolder.claims) {
+      hakaHolder.claims = BigInt.fromI32(0);
     }
-    snxHolder.claims = snxHolder.claims!.plus(BigInt.fromI32(1));
-    snxHolder.save();
+    hakaHolder.claims = hakaHolder.claims!.plus(BigInt.fromI32(1));
+    hakaHolder.save();
   }
 
   updateCurrentFeePeriod(event.address);
@@ -696,28 +694,28 @@ function updateCurrentFeePeriod(feePoolAddress: Address): void {
 function trackActiveStakers(event: ethereum.Event, isBurn: boolean): void {
   let account = event.transaction.from;
   let timestamp = event.block.timestamp;
-  let snxContract = event.transaction.to!;
+  let hakaContract = event.transaction.to!;
   let accountDebtBalance = BigInt.fromI32(0);
 
   if (dataSource.network() != 'mainnet' || event.block.number > v2100UpgradeBlock) {
-    let synthetix = SNX.bind(snxContract);
-    let accountDebtBalanceTry = synthetix.try_debtBalanceOf(account, sUSD32);
+    let tribeone = HAKA.bind(hakaContract);
+    let accountDebtBalanceTry = tribeone.try_debtBalanceOf(account, hUSD32);
     if (!accountDebtBalanceTry.reverted) {
       accountDebtBalance = accountDebtBalanceTry.value;
     }
   } else if (event.block.number > v200UpgradeBlock) {
-    let synthetix = Synthetix4.bind(snxContract);
-    let accountDebt = synthetix.try_debtBalanceOf(account, sUSD4);
-    if (!accountDebt.reverted) {
-      accountDebtBalance = accountDebt.value;
-    } else {
-      log.debug('reverted debt balance of in track active stakers for account: {}, timestamp: {}, hash: {}', [
-        account.toHex(),
-        timestamp.toString(),
-        event.transaction.hash.toHex(),
-      ]);
-      return;
-    }
+    // let tribeone = Tribeone4.bind(hakaContract);
+    // let accountDebt = tribeone.try_debtBalanceOf(account, hUSD4);
+    // if (!accountDebt.reverted) {
+    //   accountDebtBalance = accountDebt.value;
+    // } else {
+    //   log.debug('reverted debt balance of in track active stakers for account: {}, timestamp: {}, hash: {}', [
+    //     account.toHex(),
+    //     timestamp.toString(),
+    //     event.transaction.hash.toHex(),
+    //   ]);
+    //   return;
+    // }
   }
 
   let dayTimestamp = getTimeID(timestamp, DAY_SECONDS);

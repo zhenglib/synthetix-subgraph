@@ -136,7 +136,7 @@
       },
       {
         "internalType": "bytes32",
-        "name": "synthContractName",
+        "name": "tribeContractName",
         "type": "bytes32"
       }
     ],

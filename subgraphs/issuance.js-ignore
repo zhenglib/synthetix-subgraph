@@ -1,0 +1,249 @@
+const { getContractDeployments, getCurrentNetwork, createSubgraphManifest } = require('./utils/network');
+
+const balances = require('./fragments/balances');
+
+const manifest = [];
+
+// const OVERWRITE_HISTORICAL_BLOCK = 5873222;
+// const HISTORICAL_PROXY_SYNTHETIX = '0xc011a72400e58ecd99ee497cf89e3775d4bd732f';
+
+// for (const contractName of ['Tribeone', 'ERC20']) {
+for (const contractName of ['Tribeone']) {
+  getContractDeployments('Proxy' + contractName).forEach((a, i) => {
+    manifest.push({
+      kind: 'ethereum/contract',
+      name: `issuance_${contractName}_${i}`,
+      network: getCurrentNetwork(),
+      source: {
+        address: a.address,
+        startBlock: Math.max(
+          parseInt(process.env.HAKA_START_BLOCK || '0'),
+          
+          // a.address.toLowerCase() === HISTORICAL_PROXY_SYNTHETIX ? OVERWRITE_HISTORICAL_BLOCK : a.startBlock,
+          a.startBlock,
+        ),
+        abi: 'Tribeone',
+      },
+      mapping: {
+        kind: 'ethereum/events',
+        apiVersion: '0.0.5',
+        language: 'wasm/assemblyscript',
+        file: '../src/issuance.ts',
+        entities: ['HAKATransfer'],
+        abis: [
+          {
+            name: 'Tribeone',
+            file: '../abis/Tribeone.json',
+          },
+          // {
+          //   name: 'Tribeone4',
+          //   file: '../abis/Tribeone_bytes4.json',
+          // },
+          // {
+          //   name: 'Tribeone32',
+          //   file: '../abis/Tribeone_bytes32.json',
+          // },
+          {
+            name: 'AddressResolver',
+            file: '../abis/AddressResolver.json',
+          },
+          {
+            name: 'TribeoneState',
+            file: '../abis/TribeoneState.json',
+          },
+          {
+            // needed to track supply
+            name: 'Tribe',
+            file: '../abis/Tribe.json',
+          },
+        ],
+        eventHandlers: [
+          {
+            event: 'Transfer(indexed address,indexed address,uint256)',
+            handler: 'handleTransferHAKA',
+          },
+        ],
+      },
+    });
+  });
+}
+
+getContractDeployments('ProxyFeePool').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `issuance_FeePool_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: a.startBlock,
+      abi: 'FeePool',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/issuance.ts',
+      entities: ['FeesClaimed', 'HAKAHolder', 'FeePeriod'],
+      abis: [
+        {
+          name: 'FeePool',
+          file: '../abis/FeePool.json',
+        },
+        // {
+        //   name: 'FeePoolv217',
+        //   file: '../abis/FeePool_v2.17.json',
+        // },
+        // {
+        //   name: 'Tribeone4',
+        //   file: '../abis/Tribeone_bytes4.json',
+        // },
+        // {
+        //   name: 'Tribeone32',
+        //   file: '../abis/Tribeone_bytes32.json',
+        // },
+      ],
+      eventHandlers: [
+        {
+          event: 'FeesClaimed(address,uint256,uint256)',
+          handler: 'handleFeesClaimed',
+        },
+        {
+          event: 'FeePeriodClosed(uint256)',
+          handler: 'handleFeePeriodClosed',
+        },
+      ],
+    },
+  });
+});
+
+getContractDeployments('RewardEscrow').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `issuance_RewardEscrow_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: a.startBlock,
+      abi: 'RewardEscrow',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/issuance.ts',
+      entities: ['RewardEscrowHolder', 'HAKAHolder'],
+      abis: [
+        {
+          name: 'RewardEscrow',
+          file: '../abis/RewardEscrow.json',
+        },
+        {
+          name: 'Tribeone',
+          file: '../abis/Tribeone.json',
+          // file: '../abis/TribeoneGlobalDebt.json',
+        },
+        // {
+        //   name: 'Tribeone4',
+        //   file: '../abis/Tribeone_bytes4.json',
+        // },
+        // {
+        //   name: 'Tribeone32',
+        //   file: '../abis/Tribeone_bytes32.json',
+        // },
+        // {
+        //   name: 'Tribeone32',
+        //   file: '../abis/Tribeone_bytes32.json',
+        // },
+        {
+          name: 'AddressResolver',
+          file: '../abis/AddressResolver.json',
+        },
+        {
+          name: 'TribeoneState',
+          file: '../abis/TribeoneState.json',
+        },
+      ],
+      eventHandlers: [
+        {
+          event: 'VestingEntryCreated(indexed address,uint256,uint256)',
+          handler: 'handleRewardVestEvent',
+        },
+        {
+          event: 'Vested(indexed address,uint256,uint256)',
+          handler: 'handleRewardVestEvent',
+        },
+      ],
+    },
+  });
+});
+
+// for (const token of ['hUSD', 'ERC20hUSD']) {
+for (const token of ['hUSD']) {
+  getContractDeployments('Proxy' + token).forEach((a, i) => {
+    manifest.push({
+      kind: 'ethereum/contract',
+      name: `issuance_Tribe${token}_${i}`,
+      network: getCurrentNetwork(),
+      source: {
+        address: a.address,
+        startBlock: a.startBlock,
+        abi: 'Tribe',
+      },
+      mapping: {
+        kind: 'ethereum/events',
+        apiVersion: '0.0.5',
+        language: 'wasm/assemblyscript',
+        file: '../src/issuance.ts',
+        entities: ['Issued', 'Burned', 'DailyIssued', 'DailyBurned'],
+        abis: [
+          {
+            name: 'Tribe',
+            file: '../abis/Tribe.json',
+          },
+          // {
+          //   name: 'Tribeone',
+          //   file: '../abis/TribeoneGlobalDebt.json',
+          // },
+          {
+            name: 'Tribeone',
+            file: '../abis/Tribeone.json',
+          },
+          // {
+          //   name: 'Tribeone4',
+          //   file: '../abis/Tribeone_bytes4.json',
+          // },
+          // {
+          //   name: 'Tribeone32',
+          //   file: '../abis/Tribeone_bytes32.json',
+          // },
+          {
+            name: 'AddressResolver',
+            file: '../abis/AddressResolver.json',
+          },
+          // {
+          //   name: 'TribeoneState',
+          //   file: '../abis/TribeoneState.json',
+          // },
+          {
+            name: 'TribeoneState',
+            file: '../abis/TribeoneState.json',
+          },
+        ],
+        eventHandlers: [
+          {
+            event: 'Issued(indexed address,uint256)',
+            handler: 'handleIssuedTribes',
+          },
+          {
+            event: 'Burned(indexed address,uint256)',
+            handler: 'handleBurnedTribes',
+          },
+        ],
+      },
+    });
+  });
+}
+
+manifest.push(...balances.dataSources);
+
+module.exports = createSubgraphManifest('issuance', manifest, []);

@@ -1,0 +1,52 @@
+const { getContractDeployments, getCurrentNetwork, createSubgraphManifest } = require('./utils/network');
+
+const manifest = [];
+
+getContractDeployments('ProxyERC20').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `periodicUpdates_ProxyERC20_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: getCurrentNetwork() === 'mainnet' ? Math.max(13000000, a.startBlock) : a.startBlock,
+      abi: 'Proxy',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/periodic-updates.ts',
+      entities: ['DebtState', 'SystemSetting'],
+      abis: [
+        {
+          name: 'Proxy',
+          file: '../abis/Proxy.json',
+        },
+        {
+          name: 'AddressResolver',
+          file: '../abis/AddressResolver.json',
+        },
+        {
+          name: 'TribeoneDebtShare',
+          file: '../abis/TribeoneDebtShare.json',
+        },
+        // {
+        //   name: 'Tribeone',
+        //   file: '../abis/TribeoneGlobalDebt.json',
+        // },
+        {
+          name: 'Tribeone',
+          file: '../abis/Tribeone.json',
+        },
+        {
+          name: 'SystemSettings',
+          file: '../abis/SystemSettings.json',
+        },
+      ],
+      blockHandlers: [{ handler: 'handleBlock' }],
+    },
+  });
+});
+
+module.exports = createSubgraphManifest('periodic-updates', manifest, []);

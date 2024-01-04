@@ -35,7 +35,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -54,7 +54,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -99,7 +99,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -118,7 +118,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -169,7 +169,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -179,7 +179,7 @@
         "type": "uint256"
       }
     ],
-    "name": "CrossChainSynthTransferEnabledUpdated",
+    "name": "CrossChainTribeTransferEnabledUpdated",
     "type": "event"
   },
   {
@@ -298,7 +298,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -505,7 +505,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "synthKey",
+        "name": "tribeKey",
         "type": "bytes32"
       },
       {
@@ -542,6 +542,19 @@
       }
     ],
     "name": "SelfLiquidationPenaltyUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newPenalty",
+        "type": "uint256"
+      }
+    ],
+    "name": "SnxLiquidationPenaltyUpdated",
     "type": "event"
   },
   {
@@ -823,7 +836,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "crossChainSynthTransferEnabled",
+    "name": "crossChainTribeTransferEnabled",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1477,7 +1490,7 @@
         "type": "uint256"
       }
     ],
-    "name": "setCrossChainSynthTransferEnabled",
+    "name": "setCrossChainTribeTransferEnabled",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -1613,7 +1626,7 @@
     "inputs": [
       {
         "internalType": "bytes32[]",
-        "name": "synthKeys",
+        "name": "tribeKeys",
         "type": "bytes32[]"
       },
       {
@@ -1622,7 +1635,7 @@
         "type": "uint256[]"
       }
     ],
-    "name": "setExchangeFeeRateForSynths",
+    "name": "setExchangeFeeRateForTribes",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -1868,6 +1881,21 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "penalty",
+        "type": "uint256"
+      }
+    ],
+    "name": "setSnxLiquidationPenalty",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "percent",
         "type": "uint256"
       }
@@ -1966,6 +1994,21 @@
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "snxLiquidationPenalty",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {

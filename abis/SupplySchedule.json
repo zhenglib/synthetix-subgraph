@@ -133,8 +133,23 @@
         "type": "address"
       }
     ],
-    "name": "SynthetixProxyUpdated",
+    "name": "TribeoneProxyUpdated",
     "type": "event"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "CONTRACT_NAME",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "constant": true,
@@ -410,12 +425,12 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "contract ISynthetix",
-        "name": "_synthetixProxy",
+        "internalType": "contract ITribeone",
+        "name": "_tribeetixProxy",
         "type": "address"
       }
     ],
-    "name": "setSynthetixProxy",
+    "name": "setTribeoneProxy",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -424,7 +439,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "synthetixProxy",
+    "name": "tribeetixProxy",
     "outputs": [
       {
         "internalType": "address payable",

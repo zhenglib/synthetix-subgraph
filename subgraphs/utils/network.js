@@ -5,23 +5,33 @@ const package = require('../../package.json');
 const BLOCK_SAFETY_OFFSET = 8640;
 
 function getCurrentNetwork() {
-  return process.env['SNX_NETWORK'] || 'mainnet';
+  // return process.env['HAKA_NETWORK'] || 'mainnet';
+  return process.env['HAKA_NETWORK'] || 'arbitrum-goerli';
 }
 
 function getCurrentSubgraph() {
-  return process.env['SUBGRAPH'];
+  return process.env['SUBGRAPH'] || 'tribev3-arbitrum-goerli-v2';
 }
 
 function getReleaseInfo(file, network = undefined) {
   const net = network || getCurrentNetwork();
 
+  // ['mainnet', 'goerli', 'kovan', 'optimism', 'optimism-kovan', 'arbitrum-one', 'arbitrum-goerli']
+  console.log({ net });
   let info = null;
   if (net === 'mainnet' || net === 'kovan') {
-    return require('synthetix/publish/deployed/' + net + '/' + file);
+    // return require('tribeone/publish/deployed/' + net + '/' + file);
   } else if (net === 'optimism') {
-    return require('synthetix/publish/deployed/mainnet-ovm/' + file);
+    // return require('tribeone/publish/deployed/mainnet-ovm/' + file);
   } else if (net === 'optimism-kovan') {
-    return require('synthetix/publish/deployed/kovan-ovm/' + file);
+    // return require('tribeone/publish/deployed/kovan-ovm/' + file);
+  } else if (net === 'goerli') {
+    // return require('tribeone/publish/deployed/goerli/' + file);
+  } else if (net === 'arbitrum-one') {
+    // no supported now
+    // return require('tribeone/publish/deployed/arbitrum-one/' + file);
+  } else if (net === 'arbitrum-goerli') {
+    return require('../../publish/deployed/arbitrum-goerli/' + file);
   }
 
   return info;
@@ -85,7 +95,7 @@ function getReleaseBlocks() {
 const versions = getReleaseBlocks();
 
 function getContractDeployments(contractName, startBlock = 0, endBlock = Number.MAX_VALUE, network = undefined) {
-  startBlock = Math.max(Math.max(startBlock, process.env.GRAFT_BLOCK || 0), process.env['SNX_START_BLOCK'] || 0);
+  startBlock = Math.max(Math.max(startBlock, process.env.GRAFT_BLOCK || 0), process.env['HAKA_START_BLOCK'] || 0);
 
   const versionInfo = getReleaseInfo('versions', network);
 
@@ -148,8 +158,8 @@ function createSubgraphManifest(name, dataSources, templates) {
   const manifest = {
     specVersion: '0.0.4',
     features: ['grafting'],
-    description: name ? 'Synthetix Subgraph' : 'Synthetix Subgraph ' + name,
-    repository: 'https://github.com/Synthetixio/synthetix-subgraph',
+    description: name ? 'Tribeone Subgraph' : 'Tribeone Subgraph ' + name,
+    repository: 'https://github.com/TribeOneDefi/tribeone-subgraph',
     schema: {
       file: `./${name}.graphql`,
     },
@@ -171,7 +181,7 @@ function createSubgraphManifest(name, dataSources, templates) {
   return manifest;
 }
 
-const NETWORKS = ['mainnet', 'kovan', 'optimism-kovan', 'optimism'];
+const NETWORKS = ['mainnet', 'goerli', 'kovan', 'optimism', 'optimism-kovan', 'arbitrum-one', 'arbitrum-goerli'];
 
 module.exports = {
   getCurrentNetwork,

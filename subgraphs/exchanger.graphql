@@ -2,13 +2,13 @@ type ExchangeEntrySettled @entity {
   " transaction hash and log index "
   id: ID!
 
-  " synth exchanged from "
+  " tribe exchanged from "
   from: Bytes!
 
-  " synth exchanged to "
+  " tribe exchanged to "
   src: Bytes!
 
-  " number of units of synth from exchanged "
+  " number of units of tribe from exchanged "
   amount: BigDecimal!
 
   " address which receives the settlement "
@@ -20,10 +20,10 @@ type ExchangeEntrySettled @entity {
   " amount returned of dest due to overpayment "
   rebate: BigDecimal!
 
-  " aggregator price round for src synth "
+  " aggregator price round for src tribe "
   srcRoundIdAtPeriodEnd: BigInt!
 
-  " aggregator price round for dest synth "
+  " aggregator price round for dest tribe "
   destRoundIdAtPeriodEnd: BigInt!
 
   " time when the original exchange occured "
@@ -36,25 +36,25 @@ type ExchangeEntryAppended @entity {
   " ethereum address which funded the exchange "
   account: Bytes!
 
-  " synth exchanged from "
+  " tribe exchanged from "
   src: Bytes!
 
-  " number of units of synth from exchanged "
+  " number of units of tribe from exchanged "
   amount: BigDecimal!
 
-  " synth exchanged to "
+  " tribe exchanged to "
   dest: Bytes!
 
-  " number of units of synth to received "
+  " number of units of tribe to received "
   amountReceived: BigDecimal!
 
-  " fee paid in sUSD to the synthetix fee pool "
+  " fee paid in hUSD to the tribeone fee pool "
   exchangeFeeRate: BigDecimal!
 
-  " aggregator price round for src synth "
+  " aggregator price round for src tribe "
   roundIdForSrc: BigInt!
 
-  " aggregator price round for dest synth "
+  " aggregator price round for dest tribe "
   roundIdForDest: BigInt!
 }
 
@@ -107,10 +107,10 @@ type ExchangePartner @entity {
 }
 
 type InversePricingInfo @entity {
-  " Name of inverse synth. E.g. iETH "
+  " Name of inverse tribe. E.g. iETH "
   id: ID!
 
-  " whether or not this inverse synth has been frozen "
+  " whether or not this inverse tribe has been frozen "
   frozen: Boolean!
 
   " configured upper limit "
@@ -119,15 +119,15 @@ type InversePricingInfo @entity {
   " configured lower limit "
   lowerLimit: BigDecimal!
 
-  " matching price point with long synth "
+  " matching price point with long tribe "
   entryPoint: BigDecimal!
 }
 
 type LatestRate @entity {
-  " Name of synth. E.g. sUSD "
+  " Name of tribe. E.g. hUSD "
   id: ID!
 
-  " Synth USD rate "
+  " Tribe USD rate "
   rate: BigDecimal!
 
   " Address of the aggregator which produces current result "
@@ -141,7 +141,7 @@ type RateUpdate @entity {
   " currencyKey for which this this rate update applies "
   currencyKey: Bytes!
   " currencyKey expressed as a string "
-  synth: String!
+  tribe: String!
   " the rate recorded at this timestamp "
   rate: BigDecimal!
   " the block which this rate was recorded "
@@ -154,7 +154,7 @@ type RateUpdate @entity {
 type DailyCandle @entity {
   " DEPRECATED: See the Candles entity "
   id: ID!
-  synth: String!
+  tribe: String!
   open: BigDecimal!
   high: BigDecimal!
   low: BigDecimal!

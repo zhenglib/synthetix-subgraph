@@ -41,6 +41,32 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "endorsedAddress",
+        "type": "address"
+      }
+    ],
+    "name": "EndorsedAddressAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "endorsedAddress",
+        "type": "address"
+      }
+    ],
+    "name": "EndorsedAddressRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "market",
         "type": "address"
       },
@@ -118,9 +144,39 @@
     "type": "event"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "CONTRACT_NAME",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [],
     "name": "acceptOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "addresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "addEndorsedAddresses",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -142,8 +198,131 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "marketsToAdd",
+        "type": "address[]"
+      }
+    ],
+    "name": "addProxiedMarkets",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
+    "name": "allEndorsedAddresses",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "allMarketSummaries",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "market",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "asset",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "marketKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketSize",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "marketSkew",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketDebt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "currentFundingRate",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "currentFundingVelocity",
+            "type": "int256"
+          },
+          {
+            "internalType": "bool",
+            "name": "priceInvalid",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "proxied",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct FuturesMarketManager.MarketSummary[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "allMarkets",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "proxiedMarkets",
+        "type": "bool"
+      }
+    ],
     "name": "allMarkets",
     "outputs": [
       {
@@ -170,7 +349,7 @@
         "type": "uint256"
       }
     ],
-    "name": "burnSUSD",
+    "name": "burnHUSD",
     "outputs": [
       {
         "internalType": "uint256",
@@ -180,6 +359,27 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "isEndorsed",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -211,7 +411,7 @@
         "type": "uint256"
       }
     ],
-    "name": "issueSUSD",
+    "name": "issueHUSD",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -232,6 +432,193 @@
         "internalType": "address",
         "name": "",
         "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "addresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "marketSummaries",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "market",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "asset",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "marketKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketSize",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "marketSkew",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketDebt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "currentFundingRate",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "currentFundingVelocity",
+            "type": "int256"
+          },
+          {
+            "internalType": "bool",
+            "name": "priceInvalid",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "proxied",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct FuturesMarketManager.MarketSummary[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "marketKeys",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "marketSummariesForKeys",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "market",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "asset",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "marketKey",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint256",
+            "name": "price",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketSize",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "marketSkew",
+            "type": "int256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "marketDebt",
+            "type": "uint256"
+          },
+          {
+            "internalType": "int256",
+            "name": "currentFundingRate",
+            "type": "int256"
+          },
+          {
+            "internalType": "int256",
+            "name": "currentFundingVelocity",
+            "type": "int256"
+          },
+          {
+            "internalType": "bool",
+            "name": "priceInvalid",
+            "type": "bool"
+          },
+          {
+            "internalType": "bool",
+            "name": "proxied",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct FuturesMarketManager.MarketSummary[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "pageSize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "proxiedMarkets",
+        "type": "bool"
+      }
+    ],
+    "name": "markets",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
       }
     ],
     "payable": false,
@@ -332,6 +719,27 @@
   },
   {
     "constant": true,
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "proxiedMarkets",
+        "type": "bool"
+      }
+    ],
+    "name": "numMarkets",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -343,6 +751,26 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "trackingCode",
+        "type": "bytes32"
+      }
+    ],
+    "name": "payFee",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -364,6 +792,21 @@
     "constant": false,
     "inputs": [],
     "name": "rebuildCache",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "addresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "removeEndorsedAddresses",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -447,6 +890,21 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "marketsToUpdate",
+        "type": "address[]"
+      }
+    ],
+    "name": "updateMarketsImplementations",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

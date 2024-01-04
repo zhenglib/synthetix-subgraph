@@ -1,116 +1,116 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
 import {
-  Synth as SynthContract,
-  Transfer as SynthTransferEvent,
-} from '../../generated/subgraphs/balances/balances_SynthsUSD_0/Synth';
+  Tribe as TribeContract,
+  Transfer as TribeTransferEvent,
+} from '../../generated/subgraphs/balances/balances_TribehUSD_0/Tribe';
 
-import { Synth, SynthBalance, LatestSynthBalance, SynthByCurrencyKey } from '../../generated/subgraphs/balances/schema';
+import { Tribe, TribeBalance, LatestTribeBalance, TribeByCurrencyKey } from '../../generated/subgraphs/balances/schema';
 import { toDecimal, ZERO, ZERO_ADDRESS } from '../lib/helpers';
 
-export function registerSynth(synthAddress: Address): Synth | null {
+export function registerTribe(tribeAddress: Address): Tribe | null {
   // the address associated with the issuer may not be the proxy
-  let synthBackContract = SynthContract.bind(synthAddress);
-  let proxyQuery = synthBackContract.try_proxy();
-  let nameQuery = synthBackContract.try_name();
-  let symbolQuery = synthBackContract.try_symbol();
-  let totalSupplyQuery = synthBackContract.try_totalSupply();
+  let tribeBackContract = TribeContract.bind(tribeAddress);
+  let proxyQuery = tribeBackContract.try_proxy();
+  let nameQuery = tribeBackContract.try_name();
+  let symbolQuery = tribeBackContract.try_symbol();
+  let totalSupplyQuery = tribeBackContract.try_totalSupply();
 
   if (symbolQuery.reverted) {
-    log.warning('tried to save invalid synth {}', [synthAddress.toHex()]);
+    log.warning('tried to save invalid tribe {}', [tribeAddress.toHex()]);
     return null;
   }
 
   if (!proxyQuery.reverted) {
-    synthAddress = proxyQuery.value;
+    tribeAddress = proxyQuery.value;
   }
 
-  let newSynth = new Synth(synthAddress.toHex());
-  newSynth.name = nameQuery.reverted ? symbolQuery.value : nameQuery.value;
-  newSynth.symbol = symbolQuery.value;
-  newSynth.totalSupply = toDecimal(totalSupplyQuery.value);
-  newSynth.save();
+  let newTribe = new Tribe(tribeAddress.toHex());
+  newTribe.name = nameQuery.reverted ? symbolQuery.value : nameQuery.value;
+  newTribe.symbol = symbolQuery.value;
+  newTribe.totalSupply = toDecimal(totalSupplyQuery.value);
+  newTribe.save();
 
   // symbol is same as currencyKey
-  let newSynthByCurrencyKey = new SynthByCurrencyKey(symbolQuery.value);
-  newSynthByCurrencyKey.proxyAddress = synthAddress;
-  newSynthByCurrencyKey.save();
+  let newTribeByCurrencyKey = new TribeByCurrencyKey(symbolQuery.value);
+  newTribeByCurrencyKey.proxyAddress = tribeAddress;
+  newTribeByCurrencyKey.save();
 
-  // legacy sUSD contract uses wrong name
+  // legacy hUSD contract uses wrong name
   if (symbolQuery.value == 'nUSD') {
-    let newSynthByCurrencyKey = new SynthByCurrencyKey('sUSD');
-    newSynthByCurrencyKey.proxyAddress = synthAddress;
-    newSynthByCurrencyKey.save();
+    let newTribeByCurrencyKey = new TribeByCurrencyKey('hUSD');
+    newTribeByCurrencyKey.proxyAddress = tribeAddress;
+    newTribeByCurrencyKey.save();
   }
 
-  return newSynth;
+  return newTribe;
 }
 
-function trackSynthHolder(synthAddress: Address, account: Address, timestamp: BigInt, value: BigDecimal): void {
-  let synth = Synth.load(synthAddress.toHex());
+function trackTribeHolder(tribeAddress: Address, account: Address, timestamp: BigInt, value: BigDecimal): void {
+  let tribe = Tribe.load(tribeAddress.toHex());
 
-  if (synth == null) {
-    registerSynth(synthAddress);
+  if (tribe == null) {
+    registerTribe(tribeAddress);
   }
 
   let totalBalance = toDecimal(ZERO);
-  let latestBalanceID = account.toHex() + '-' + synthAddress.toHex();
-  let oldSynthBalance = LatestSynthBalance.load(latestBalanceID);
+  let latestBalanceID = account.toHex() + '-' + tribeAddress.toHex();
+  let oldTribeBalance = LatestTribeBalance.load(latestBalanceID);
 
-  if (oldSynthBalance == null || oldSynthBalance.timestamp.equals(timestamp)) {
-    totalBalance = toDecimal(SynthContract.bind(synthAddress).balanceOf(account));
+  if (oldTribeBalance == null || oldTribeBalance.timestamp.equals(timestamp)) {
+    totalBalance = toDecimal(TribeContract.bind(tribeAddress).balanceOf(account));
   } else {
-    totalBalance = oldSynthBalance.amount.plus(value);
+    totalBalance = oldTribeBalance.amount.plus(value);
   }
 
-  let newLatestBalance = new LatestSynthBalance(latestBalanceID);
+  let newLatestBalance = new LatestTribeBalance(latestBalanceID);
   newLatestBalance.address = account;
   newLatestBalance.account = account.toHex();
   newLatestBalance.timestamp = timestamp;
-  newLatestBalance.synth = synthAddress.toHex();
+  newLatestBalance.tribe = tribeAddress.toHex();
   newLatestBalance.amount = totalBalance;
   newLatestBalance.save();
 
-  let newBalanceID = timestamp.toString() + '-' + account.toHex() + '-' + synthAddress.toHex();
-  let newBalance = new SynthBalance(newBalanceID);
+  let newBalanceID = timestamp.toString() + '-' + account.toHex() + '-' + tribeAddress.toHex();
+  let newBalance = new TribeBalance(newBalanceID);
   newBalance.address = account;
   newBalance.account = account.toHex();
   newBalance.timestamp = timestamp;
-  newBalance.synth = synthAddress.toHex();
+  newBalance.tribe = tribeAddress.toHex();
   newBalance.amount = totalBalance;
   newBalance.save();
 }
 
-function trackMintOrBurn(synthAddress: Address, value: BigDecimal): void {
-  let synth = Synth.load(synthAddress.toHex());
+function trackMintOrBurn(tribeAddress: Address, value: BigDecimal): void {
+  let tribe = Tribe.load(tribeAddress.toHex());
 
-  if (synth == null) {
-    synth = registerSynth(synthAddress);
+  if (tribe == null) {
+    tribe = registerTribe(tribeAddress);
   }
 
-  if (synth != null) {
-    let newSupply = synth.totalSupply.plus(value);
+  if (tribe != null) {
+    let newSupply = tribe.totalSupply.plus(value);
 
     if (newSupply.lt(toDecimal(ZERO))) {
-      log.warning('totalSupply needs correction, is negative: %s', [synth.symbol]);
-      let synthBackContract = SynthContract.bind(synthAddress);
-      synth.totalSupply = toDecimal(synthBackContract.totalSupply());
+      log.warning('totalSupply needs correction, is negative: %s', [tribe.symbol]);
+      let tribeBackContract = TribeContract.bind(tribeAddress);
+      tribe.totalSupply = toDecimal(tribeBackContract.totalSupply());
     } else {
-      synth.totalSupply = newSupply;
+      tribe.totalSupply = newSupply;
     }
 
-    synth.save();
+    tribe.save();
   }
 }
 
-export function handleTransferSynth(event: SynthTransferEvent): void {
+export function handleTransferTribe(event: TribeTransferEvent): void {
   if (event.params.from.toHex() != ZERO_ADDRESS.toHex() && event.params.from != event.address) {
-    trackSynthHolder(event.address, event.params.from, event.block.timestamp, toDecimal(event.params.value).neg());
+    trackTribeHolder(event.address, event.params.from, event.block.timestamp, toDecimal(event.params.value).neg());
   } else {
     trackMintOrBurn(event.address, toDecimal(event.params.value));
   }
 
   if (event.params.to.toHex() != ZERO_ADDRESS.toHex() && event.params.to != event.address) {
-    trackSynthHolder(event.address, event.params.to, event.block.timestamp, toDecimal(event.params.value));
+    trackTribeHolder(event.address, event.params.to, event.block.timestamp, toDecimal(event.params.value));
   } else {
     trackMintOrBurn(event.address, toDecimal(event.params.value).neg());
   }

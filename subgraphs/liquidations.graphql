@@ -11,8 +11,8 @@ type AccountFlaggedForLiquidation @entity {
   " current collateral ratio "
   collateralRatio: BigInt!
 
-  " snx that is liquidatable "
-  liquidatableNonEscrowSNX: BigDecimal!
+  " haka that is liquidatable "
+  liquidatableNonEscrowHAKA: BigDecimal!
 
   " total collateral held by the staker including escrow amount "
   collateral: BigDecimal!
@@ -35,10 +35,10 @@ type AccountLiquidated @entity {
   "the liquidated address"
   account: Bytes!
 
-  "the amount of SNX redeemed by the liquidator"
-  snxRedeemed: BigDecimal!
+  "the amount of HAKA redeemed by the liquidator"
+  hakaRedeemed: BigDecimal!
 
-  "the amount of sUSD liquidated"
+  "the amount of hUSD liquidated"
   amountLiquidated: BigDecimal!
 
   "the address liquidating the account"

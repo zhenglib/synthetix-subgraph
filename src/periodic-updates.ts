@@ -1,12 +1,12 @@
-// The latest Synthetix and event invocations
+// The latest Tribeone and event invocations
 
-import { Synthetix as SNX } from '../generated/subgraphs/periodic-updates/periodicUpdates_ProxyERC20_0/Synthetix';
-import { SynthetixDebtShare } from '../generated/subgraphs/periodic-updates/periodicUpdates_ProxyERC20_0/SynthetixDebtShare';
+import { Tribeone as HAKA } from '../generated/subgraphs/periodic-updates/periodicUpdates_ProxyERC20_0/Tribeone';
+import { TribeoneDebtShare } from '../generated/subgraphs/periodic-updates/periodicUpdates_ProxyERC20_0/TribeoneDebtShare';
 import { SystemSettings as SystemSettingsContract } from '../generated/subgraphs/periodic-updates/periodicUpdates_ProxyERC20_0/SystemSettings';
 
 import { CANDLE_PERIODS, strToBytes, toDecimal, ZERO } from './lib/helpers';
 
-// SynthetixState has not changed ABI since deployment
+// TribeoneState has not changed ABI since deployment
 
 import { DebtState, SystemSetting } from '../generated/subgraphs/periodic-updates/schema';
 
@@ -123,20 +123,21 @@ export function trackGlobalDebt(block: ethereum.Block): void {
   let curDebtState = DebtState.load(timeSlot.toString());
 
   if (curDebtState == null) {
-    let sdsAddress = getContractDeployment('SynthetixDebtShare', dataSource.network(), block.number)!;
-    let sds = SynthetixDebtShare.bind(sdsAddress);
+    let sdsAddress = getContractDeployment('TribeoneDebtShare', dataSource.network(), block.number)!;
+    let sds = TribeoneDebtShare.bind(sdsAddress);
 
-    let synthetix = SNX.bind(dataSource.address());
-    let issuedSynths = synthetix.try_totalIssuedSynthsExcludeOtherCollateral(strToBytes('sUSD', 32));
+    let tribeone = HAKA.bind(dataSource.address());
+    let issuedTribes = tribeone.try_totalIssuedTribesExcludeOtherCollateral(strToBytes('hUSD', 32));
 
-    if (issuedSynths.reverted) {
-      issuedSynths = synthetix.try_totalIssuedSynthsExcludeEtherCollateral(strToBytes('sUSD', 32));
+    if (issuedTribes.reverted) {
+      // issuedTribes = tribeone.try_totalIssuedTribesExcludeEtherCollateral(strToBytes('hUSD', 32));
+      issuedTribes = tribeone.try_totalIssuedTribes(strToBytes('hUSD', 32));
 
-      if (issuedSynths.reverted) {
-        issuedSynths = synthetix.try_totalIssuedSynths(strToBytes('sUSD', 32));
-        if (issuedSynths.reverted) {
+      if (issuedTribes.reverted) {
+        issuedTribes = tribeone.try_totalIssuedTribes(strToBytes('hUSD', 32));
+        if (issuedTribes.reverted) {
           // for some reason this can happen (not sure how)
-          log.debug('failed to get issued synths (skip', []);
+          log.debug('failed to get issued tribes (skip', []);
           return;
         }
       }
@@ -152,11 +153,11 @@ export function trackGlobalDebt(block: ethereum.Block): void {
         let debtStateEntity = new DebtState(id);
 
         debtStateEntity.debtEntry = toDecimal(debtSharesSupply.value);
-        debtStateEntity.totalIssuedSynths = toDecimal(issuedSynths.value);
+        debtStateEntity.totalIssuedTribes = toDecimal(issuedTribes.value);
 
         debtStateEntity.debtRatio = debtStateEntity.debtEntry.equals(toDecimal(ZERO))
           ? toDecimal(ZERO)
-          : debtStateEntity.totalIssuedSynths.div(debtStateEntity.debtEntry);
+          : debtStateEntity.totalIssuedTribes.div(debtStateEntity.debtEntry);
 
         debtStateEntity.timestamp = block.timestamp;
         debtStateEntity.period = period;

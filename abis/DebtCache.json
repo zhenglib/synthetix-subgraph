@@ -229,7 +229,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "cachedSynthDebt",
+    "name": "cachedTribeDebt",
     "outputs": [
       {
         "internalType": "uint256",
@@ -250,7 +250,7 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "cachedSynthDebts",
+    "name": "cachedTribeDebts",
     "outputs": [
       {
         "internalType": "uint256[]",
@@ -291,7 +291,7 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "currentSynthDebts",
+    "name": "currentTribeDebts",
     "outputs": [
       {
         "internalType": "uint256[]",
@@ -458,7 +458,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "purgeCachedSynthDebt",
+    "name": "purgeCachedTribeDebt",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -566,7 +566,7 @@
         "type": "uint256"
       }
     ],
-    "name": "updateCachedSynthDebtWithRate",
+    "name": "updateCachedTribeDebtWithRate",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -581,7 +581,7 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "updateCachedSynthDebts",
+    "name": "updateCachedTribeDebts",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -601,7 +601,7 @@
         "type": "uint256[]"
       }
     ],
-    "name": "updateCachedSynthDebtsWithRates",
+    "name": "updateCachedTribeDebtsWithRates",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -616,7 +616,7 @@
         "type": "int256"
       }
     ],
-    "name": "updateCachedsUSDDebt",
+    "name": "updateCachedhUSDDebt",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",

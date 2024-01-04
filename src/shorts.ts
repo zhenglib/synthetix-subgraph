@@ -106,8 +106,8 @@ function createShort(event: LoanCreatedEvent, collateralLocked: Bytes): void {
   shortEntity.account = event.params.account;
   shortEntity.collateralLocked = collateralLocked;
   shortEntity.collateralLockedAmount = toDecimal(event.params.collateral);
-  shortEntity.synthBorrowed = event.params.currency;
-  shortEntity.synthBorrowedAmount = toDecimal(event.params.amount);
+  shortEntity.tribeBorrowed = event.params.currency;
+  shortEntity.tribeBorrowedAmount = toDecimal(event.params.amount);
   shortEntity.isOpen = true;
   shortEntity.createdAt = event.block.timestamp;
   shortEntity.accruedInterestLastUpdateTimestamp = event.block.timestamp;
@@ -118,7 +118,7 @@ function createShort(event: LoanCreatedEvent, collateralLocked: Bytes): void {
     event.logIndex.toString(),
     false,
     toDecimal(event.params.amount),
-    shortEntity.synthBorrowedAmount,
+    shortEntity.tribeBorrowedAmount,
     event.block.timestamp,
     event.block.number,
     shortEntity as Short,
@@ -185,7 +185,7 @@ function saveLoanChangeEntity(
   shortEntity: Short,
 ): void {
   let shortLoanChangeEntity = new ShortLoanChange(txHash + '-' + logIndex);
-  let rate = getLatestRate(shortEntity.synthBorrowed.toString(), txHash);
+  let rate = getLatestRate(shortEntity.tribeBorrowed.toString(), txHash);
   shortLoanChangeEntity.rate = rate ? (rate as BigDecimal) : toDecimal(ZERO);
   shortLoanChangeEntity.isRepayment = isRepayment;
   shortLoanChangeEntity.amount = amount;
@@ -217,7 +217,7 @@ function handleLiquidations(
   }
   shortEntity.accruedInterestLastUpdateTimestamp = timestamp;
   shortEntity.collateralLockedAmount = shortEntity.collateralLockedAmount.minus(liquidatedCollateral);
-  shortEntity.synthBorrowedAmount = shortEntity.synthBorrowedAmount.minus(liquidatedAmount);
+  shortEntity.tribeBorrowedAmount = shortEntity.tribeBorrowedAmount.minus(liquidatedAmount);
   shortEntity.save();
   let shortLiquidationEntity = new ShortLiquidation(txHash + '-' + logIndex);
   shortLiquidationEntity.liquidator = liquidator;
@@ -230,11 +230,11 @@ function handleLiquidations(
   shortLiquidationEntity.save();
 }
 
-export function handleShortLoanCreatedsUSD(event: LoanCreatedEvent): void {
-  createShort(event, strToBytes('sUSD', 32));
+export function handleShortLoanCreatedhUSD(event: LoanCreatedEvent): void {
+  createShort(event, strToBytes('hUSD', 32));
 }
 
-export function handleShortLoanClosedsUSD(event: LoanClosedEvent): void {
+export function handleShortLoanClosedhUSD(event: LoanClosedEvent): void {
   let shortEntity = Short.load(event.params.id.toString());
   if (shortEntity == null) {
     log.error('trying to close a loan that does not exist with id: {} from txHash: {}', [
@@ -246,12 +246,12 @@ export function handleShortLoanClosedsUSD(event: LoanClosedEvent): void {
   shortEntity.isOpen = false;
   shortEntity.closedAt = event.block.timestamp;
   shortEntity.accruedInterestLastUpdateTimestamp = event.block.timestamp;
-  shortEntity.synthBorrowedAmount = toDecimal(BigInt.fromI32(0));
+  shortEntity.tribeBorrowedAmount = toDecimal(BigInt.fromI32(0));
   shortEntity.collateralLockedAmount = toDecimal(BigInt.fromI32(0));
   shortEntity.save();
 }
 
-export function handleShortCollateralDepositedsUSD(event: CollateralDepositedEvent): void {
+export function handleShortCollateralDepositedhUSD(event: CollateralDepositedEvent): void {
   handleDepositOrWithdrawal(
     event.params.id.toString(),
     event.transaction.hash.toHex(),
@@ -264,7 +264,7 @@ export function handleShortCollateralDepositedsUSD(event: CollateralDepositedEve
   );
 }
 
-export function handleShortCollateralWithdrawnsUSD(event: CollateralWithdrawnEvent): void {
+export function handleShortCollateralWithdrawnhUSD(event: CollateralWithdrawnEvent): void {
   handleDepositOrWithdrawal(
     event.params.id.toString(),
     event.transaction.hash.toHex(),
@@ -277,7 +277,7 @@ export function handleShortCollateralWithdrawnsUSD(event: CollateralWithdrawnEve
   );
 }
 
-export function handleShortLoanRepaymentMadesUSD(event: LoanRepaymentMadeEvent): void {
+export function handleShortLoanRepaymentMadehUSD(event: LoanRepaymentMadeEvent): void {
   let shortEntity = Short.load(event.params.id.toString());
   if (shortEntity == null) {
     log.error('trying to repay on a loan that does not exist with id: {} from txHash: {}', [
@@ -286,20 +286,20 @@ export function handleShortLoanRepaymentMadesUSD(event: LoanRepaymentMadeEvent):
     ]);
     return;
   }
-  let newTotal = shortEntity.synthBorrowedAmount.minus(toDecimal(event.params.amountRepaid));
+  let newTotal = shortEntity.tribeBorrowedAmount.minus(toDecimal(event.params.amountRepaid));
   if (toDecimal(event.params.amountAfter).notEqual(newTotal)) {
     log.error(
-      'for short loan replayment there is a math error where amountAfter: {} does not equal current synthBorrowedAmount: {} minus new repayment: {}, which totals to: {}',
+      'for short loan replayment there is a math error where amountAfter: {} does not equal current tribeBorrowedAmount: {} minus new repayment: {}, which totals to: {}',
       [
         event.params.amountAfter.toString(),
-        shortEntity.synthBorrowedAmount.toString(),
+        shortEntity.tribeBorrowedAmount.toString(),
         event.params.amountRepaid.toString(),
         newTotal.toString(),
       ],
     );
   }
   shortEntity.accruedInterestLastUpdateTimestamp = event.block.timestamp;
-  shortEntity.synthBorrowedAmount = toDecimal(event.params.amountAfter);
+  shortEntity.tribeBorrowedAmount = toDecimal(event.params.amountAfter);
   shortEntity.save();
   saveLoanChangeEntity(
     event.transaction.hash.toHex(),
@@ -314,7 +314,7 @@ export function handleShortLoanRepaymentMadesUSD(event: LoanRepaymentMadeEvent):
 }
 
 // NOTE the drawn down event should pass the amount after like the repayment event
-export function handleShortLoanDrawnDownsUSD(event: LoanDrawnDownEvent): void {
+export function handleShortLoanDrawnDownhUSD(event: LoanDrawnDownEvent): void {
   let shortEntity = Short.load(event.params.id.toString());
   if (shortEntity == null) {
     log.error('trying to increase a loan that does not exist with id: {} from txHash: {}', [
@@ -323,7 +323,7 @@ export function handleShortLoanDrawnDownsUSD(event: LoanDrawnDownEvent): void {
     ]);
     return;
   }
-  shortEntity.synthBorrowedAmount = shortEntity.synthBorrowedAmount.plus(toDecimal(event.params.amount));
+  shortEntity.tribeBorrowedAmount = shortEntity.tribeBorrowedAmount.plus(toDecimal(event.params.amount));
   shortEntity.accruedInterestLastUpdateTimestamp = event.block.timestamp;
   shortEntity.save();
   saveLoanChangeEntity(
@@ -331,14 +331,14 @@ export function handleShortLoanDrawnDownsUSD(event: LoanDrawnDownEvent): void {
     event.logIndex.toString(),
     false,
     toDecimal(event.params.amount),
-    shortEntity.synthBorrowedAmount,
+    shortEntity.tribeBorrowedAmount,
     event.block.timestamp,
     event.block.number,
     shortEntity as Short,
   );
 }
 
-export function handleLoanPartiallyLiquidatedsUSD(event: LoanPartiallyLiquidatedEvent): void {
+export function handleLoanPartiallyLiquidatedhUSD(event: LoanPartiallyLiquidatedEvent): void {
   handleLiquidations(
     event.transaction.hash.toHex(),
     event.logIndex.toString(),
@@ -352,7 +352,7 @@ export function handleLoanPartiallyLiquidatedsUSD(event: LoanPartiallyLiquidated
   );
 }
 
-export function handleLoanClosedByLiquidationsUSD(event: LoanClosedByLiquidationEvent): void {
+export function handleLoanClosedByLiquidationhUSD(event: LoanClosedByLiquidationEvent): void {
   handleLiquidations(
     event.transaction.hash.toHex(),
     event.logIndex.toString(),
@@ -378,12 +378,12 @@ export function handleLoanClosedByRepayment(event: LoanClosedByRepaymentEvent): 
   shortEntity.isOpen = false;
   shortEntity.closedAt = event.block.timestamp;
   shortEntity.accruedInterestLastUpdateTimestamp = event.block.timestamp;
-  shortEntity.synthBorrowedAmount = toDecimal(BigInt.fromI32(0));
+  shortEntity.tribeBorrowedAmount = toDecimal(BigInt.fromI32(0));
   shortEntity.collateralLockedAmount = toDecimal(BigInt.fromI32(0));
   shortEntity.save();
 }
 
-export function handleMinCollateralUpdatedsUSD(event: MinCollateralUpdatedEvent): void {
+export function handleMinCollateralUpdatedhUSD(event: MinCollateralUpdatedEvent): void {
   let shortContractEntity = loadContractData(
     event.address,
     event.transaction.hash.toHex(),
@@ -404,7 +404,7 @@ export function handleMinCollateralUpdatedsUSD(event: MinCollateralUpdatedEvent)
   );
 }
 
-export function handleIssueFeeRateUpdatedsUSD(event: IssueFeeRateUpdatedEvent): void {
+export function handleIssueFeeRateUpdatedhUSD(event: IssueFeeRateUpdatedEvent): void {
   let shortContractEntity = loadContractData(
     event.address,
     event.transaction.hash.toHex(),
@@ -425,7 +425,7 @@ export function handleIssueFeeRateUpdatedsUSD(event: IssueFeeRateUpdatedEvent): 
   );
 }
 
-export function handleCanOpenLoansUpdatedsUSD(event: CanOpenLoansUpdatedEvent): void {
+export function handleCanOpenLoansUpdatedhUSD(event: CanOpenLoansUpdatedEvent): void {
   let shortContractEntity = loadContractData(
     event.address,
     event.transaction.hash.toHex(),

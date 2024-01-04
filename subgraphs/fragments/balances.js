@@ -1,10 +1,10 @@
 const { getContractDeployments, getCurrentNetwork, getReleaseInfo } = require('../utils/network');
 
-const synthsManifests = [];
+const tribesManifests = [];
 
 // TODO: added for possible future case of needing to handle these events with templated data source
 /*getContractDeployments('Issuer').forEach((a, i) => {
-  synthsManifests.push({
+  tribesManifests.push({
     kind: 'ethereum/contract',
     name: `balances_Issuer_${i}`,
     network: getCurrentNetwork(),
@@ -18,61 +18,64 @@ const synthsManifests = [];
       apiVersion: '0.0.5',
       language: 'wasm/assemblyscript',
       file: '../src/fragments/balances.ts',
-      entities: ['Synth'],
+      entities: ['Tribe'],
       abis: [
         {
           name: 'Issuer',
           file: '../abis/Issuer.json',
         },
         {
-          name: 'Synth',
-          file: '../abis/Synth.json',
+          name: 'Tribe',
+          file: '../abis/Tribe.json',
         },
       ],
       eventHandlers: [
         {
-          event: 'SynthAdded(bytes32,address)',
-          handler: 'handleAddSynth',
+          event: 'TribeAdded(bytes32,address)',
+          handler: 'handleAddTribe',
         },
         {
-          event: 'SynthRemoved(bytes32,address)',
-          handler: 'handleRemoveSynth',
+          event: 'TribeRemoved(bytes32,address)',
+          handler: 'handleRemoveTribe',
         },
       ],
     },
   });
 });*/
 
-const synths = getReleaseInfo('synths');
+const tribes = getReleaseInfo('tribes');
 
-for (const { name } of synths) {
-  getContractDeployments('Proxy' + (name == 'sUSD' ? 'ERC20' + name : name)).forEach((a, i) => {
-    synthsManifests.push({
+console.log('tribes: ', { tribes });
+
+for (const { name } of tribes) {
+  // getContractDeployments('Proxy' + (name == 'hUSD' ? 'ERC20' + name : name)).forEach((a, i) => {
+  getContractDeployments('Proxy' + name).forEach((a, i) => {
+    tribesManifests.push({
       kind: 'ethereum/contract',
-      // for some reason sUSD has different contract name
-      name: `balances_Synth${name}_${i}`,
+      // for some reason hUSD has different contract name
+      name: `balances_Tribe${name}_${i}`,
       network: getCurrentNetwork(),
       source: {
         address: a.address,
         startBlock: a.startBlock,
-        abi: 'Synth',
+        abi: 'Tribe',
       },
       mapping: {
         kind: 'ethereum/events',
         apiVersion: '0.0.5',
         language: 'wasm/assemblyscript',
         file: '../src/fragments/balances.ts',
-        entities: ['Synth', 'LatestSynthBalance', 'AggregateSynthBalance'],
+        entities: ['Tribe', 'LatestTribeBalance', 'AggregateTribeBalance'],
         abis: [
           {
-            name: 'Synth',
-            file: '../abis/Synth.json',
+            name: 'Tribe',
+            file: '../abis/Tribe.json',
           },
         ],
         eventHandlers: [
           {
             event: 'Transfer(indexed address,indexed address,uint256)',
-            handler: 'handleTransferSynth',
+            handler: 'handleTransferTribe',
           },
         ],
       },
@@ -81,5 +84,5 @@ for (const { name } of synths) {
 }
 
 module.exports = {
-  dataSources: synthsManifests,
+  dataSources: tribesManifests,
 };

@@ -11,7 +11,8 @@
   "scripts": {
     "lint": "eslint src/ scripts/ subgraphs/",
     "prepare": "husky install",
-    "deploy": "node ./scripts/deploy.js"
+    "deploy": "node ./scripts/deploy.js",
+    "build": "node ./scripts/deploy.js --build-only"
   },
   "lint-staged": {
     "**/*": "prettier --write --ignore-unknown"

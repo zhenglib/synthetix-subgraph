@@ -1,0 +1,293 @@
+const { clone } = require('lodash');
+
+const { getContractDeployments, getCurrentNetwork, createSubgraphManifest } = require('./utils/network');
+
+const latestRates = require('./fragments/latest-rates');
+const balances = require('./fragments/balances');
+
+const manifest = [];
+
+if (getCurrentNetwork() == 'mainnet') {
+  manifest.push(
+    // {
+    //   kind: 'ethereum/contract',
+    //   name: 'exchanges_Tribeone4_viaOldProxy',
+    //   network: getCurrentNetwork(),
+    //   source: {
+    //     address: '0xc011a72400e58ecd99ee497cf89e3775d4bd732f',
+    //     abi: 'Tribeone4',
+    //     startBlock: Math.max(parseInt(process.env.HAKA_START_BLOCK || '0'), 6841188),
+    //   },
+    //   mapping: {
+    //     kind: 'ethereum/events',
+    //     apiVersion: '0.0.5',
+    //     language: 'wasm/assemblyscript',
+    //     file: '../src/exchanges.ts',
+    //     entities: ['TribeExchange', 'FeeRate'],
+    //     abis: [
+    //       {
+    //         name: 'Tribeone4',
+    //         file: '../abis/Tribeone_bytes4.json',
+    //       },
+    //       {
+    //         name: 'Tribeone32',
+    //         file: '../abis/Tribeone_bytes32.json',
+    //       },
+    //       {
+    //         name: 'Tribeone',
+    //         file: '../abis/Tribeone.json',
+    //       },
+    //       {
+    //         name: 'AddressResolver',
+    //         file: '../abis/AddressResolver.json',
+    //       },
+    //       {
+    //         name: 'ExchangeRates',
+    //         file: '../abis/ExchangeRates.json',
+    //       },
+    //       {
+    //         name: 'AggregatorProxy',
+    //         file: '../abis/AggregatorProxy.json',
+    //       },
+    //       {
+    //         name: 'SystemSettings',
+    //         file: '../abis/SystemSettings.json',
+    //       },
+    //     ],
+    //     eventHandlers: [
+    //       {
+    //         event: 'TribeExchange(indexed address,bytes4,uint256,bytes4,uint256,address)',
+    //         handler: 'handleTribeExchange',
+    //       },
+    //     ],
+    //   },
+    // },
+    {
+      kind: 'ethereum/contract',
+      // name: 'exchanges_Tribeone_viaOldProxy',
+      name: 'exchanges_Tribeone_viaProxy',
+      network: getCurrentNetwork(),
+      source: {
+        address: '',
+        abi: 'Tribeone',
+        startBlock: Math.max(parseInt(process.env.HAKA_START_BLOCK || '0'), 8622911),
+      },
+      mapping: {
+        kind: 'ethereum/events',
+        apiVersion: '0.0.5',
+        language: 'wasm/assemblyscript',
+        file: '../src/exchanges.ts',
+        entities: ['TribeExchange', 'ExchangeReclaim', 'ExchangeRebate', 'FeeRate'],
+        abis: [
+          // {
+          //   name: 'Tribeone4',
+          //   file: '../abis/Tribeone_bytes4.json',
+          // },
+          // {
+          //   name: 'Tribeone32',
+          //   file: '../abis/Tribeone_bytes32.json',
+          // },
+          {
+            name: 'Tribeone',
+            file: '../abis/Tribeone.json',
+          },
+          {
+            name: 'AddressResolver',
+            file: '../abis/AddressResolver.json',
+          },
+          {
+            name: 'ExchangeRates',
+            file: '../abis/ExchangeRates.json',
+          },
+          {
+            name: 'SystemSettings',
+            file: '../abis/SystemSettings.json',
+          },
+        ],
+        eventHandlers: [
+          {
+            event: 'TribeExchange(indexed address,bytes32,uint256,bytes32,uint256,address)',
+            handler: 'handleTribeExchange',
+          },
+          {
+            event: 'ExchangeReclaim(indexed address,bytes32,uint256)',
+            handler: 'handleExchangeReclaim',
+          },
+          {
+            event: 'ExchangeRebate(indexed address,bytes32,uint256)',
+            handler: 'handleExchangeRebate',
+          },
+        ],
+      },
+    },
+  );
+}
+
+getContractDeployments('ProxyERC20').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `exchanges_Tribeone_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: a.startBlock,
+      abi: 'Tribeone',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/exchanges.ts',
+      entities: ['TribeExchange', 'ExchangeReclaim', 'ExchangeRebate', 'FeeRate'],
+      abis: [
+        // {
+        //   name: 'Tribeone4',
+        //   file: '../abis/Tribeone_bytes4.json',
+        // },
+        // {
+        //   name: 'Tribeone32',
+        //   file: '../abis/Tribeone_bytes32.json',
+        // },
+        {
+          name: 'Tribeone',
+          file: '../abis/Tribeone.json',
+        },
+        {
+          name: 'AddressResolver',
+          file: '../abis/AddressResolver.json',
+        },
+        {
+          name: 'ExchangeRates',
+          file: '../abis/ExchangeRates.json',
+        },
+        {
+          name: 'AggregatorProxy',
+          file: '../abis/AggregatorProxy.json',
+        },
+        {
+          name: 'SystemSettings',
+          file: '../abis/SystemSettings.json',
+        },
+      ],
+      eventHandlers: [
+        {
+          event: 'TribeExchange(indexed address,bytes32,uint256,bytes32,uint256,address)',
+          handler: 'handleTribeExchange',
+        },
+        {
+          event: 'ExchangeReclaim(indexed address,bytes32,uint256)',
+          handler: 'handleExchangeReclaim',
+        },
+        {
+          event: 'ExchangeRebate(indexed address,bytes32,uint256)',
+          handler: 'handleExchangeRebate',
+        },
+        {
+          event: 'AtomicTribeExchange(indexed address,bytes32,uint256,bytes32,uint256,address)',
+          handler: 'handleAtomicTribeExchange',
+        },
+      ],
+    },
+  });
+});
+
+getContractDeployments('SystemSettings').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `exchanges_SystemSettings_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: a.startBlock,
+      abi: 'SystemSettings',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/exchanges.ts',
+      entities: ['SystemSettings'],
+      abis: [
+        {
+          name: 'SystemSettings',
+          file: '../abis/SystemSettings.json',
+        },
+      ],
+      eventHandlers: [
+        {
+          event: 'ExchangeFeeUpdated(bytes32,uint256)',
+          handler: 'handleFeeChange',
+        },
+      ],
+    },
+  });
+});
+
+getContractDeployments('FuturesMarketManager').forEach((a, i) => {
+  manifest.push({
+    kind: 'ethereum/contract',
+    name: `exchanges_FuturesMarketManager_${i}`,
+    network: getCurrentNetwork(),
+    source: {
+      address: a.address,
+      startBlock: a.startBlock,
+      abi: 'FuturesMarketManager',
+    },
+    mapping: {
+      kind: 'ethereum/events',
+      apiVersion: '0.0.5',
+      language: 'wasm/assemblyscript',
+      file: '../src/exchanges.ts',
+      entities: ['FuturesMarket'],
+      abis: [
+        {
+          name: 'FuturesMarket',
+          file: '../abis/FuturesMarket.json',
+        },
+        {
+          name: 'FuturesMarketManager',
+          file: '../abis/FuturesMarketManager.json',
+        },
+      ],
+      eventHandlers: [
+        {
+          event: 'MarketAdded(address,indexed bytes32,indexed bytes32)',
+          handler: 'handleMarketAdded',
+        },
+      ],
+    },
+  });
+});
+
+let futuresMarketTemplate = {
+  kind: 'ethereum/contract',
+  name: 'FuturesMarketTemplate',
+  network: getCurrentNetwork(),
+  source: {
+    abi: 'FuturesMarket',
+  },
+  mapping: {
+    kind: 'ethereum/events',
+    apiVersion: '0.0.5',
+    language: 'wasm/assemblyscript',
+    file: '../src/exchanges.ts',
+    entities: ['FuturesMarket'],
+    abis: [
+      {
+        name: 'FuturesMarket',
+        file: '../abis/FuturesMarket.json',
+      },
+    ],
+    eventHandlers: [
+      {
+        event: 'PositionModified(indexed uint256,indexed address,uint256,int256,int256,uint256,uint256,uint256)',
+        handler: 'handlePositionModified',
+      },
+    ],
+  },
+};
+
+manifest.push(...balances.dataSources);
+manifest.push(...latestRates.dataSources);
+
+module.exports = createSubgraphManifest('exchanges', manifest, [...latestRates.templates, futuresMarketTemplate]);
